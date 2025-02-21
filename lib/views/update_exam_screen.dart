@@ -1,3 +1,4 @@
+import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/exam_view_model.dart';
@@ -36,6 +37,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   DateTime? examDate;
   DateTime? ageFrom;
 
+  String? selectedCategory;
+
   bool isadmitCardAvailable = false;
   bool isanswerKeyAvailable = false;
   bool syllabusAvailable = false;
@@ -47,6 +50,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   void initState() {
     super.initState();
     fetchExamData();
+    fetchCategoryData();
   }
 
   Future<void> fetchExamData() async {
@@ -57,6 +61,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     if (exam != null) {
       setState(() {
         nameController = TextEditingController(text: exam["name"]);
+        selectedCategory = exam["category"]["id"];
         minAgeController =
             TextEditingController(text: exam["minAge"]?.toString() ?? '');
         maxAgeController =
@@ -108,6 +113,17 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     }
   }
 
+  Future<void> fetchCategoryData() async {
+    final categoryViewModel = Provider.of<CategoryViewModel>(context, listen: false);
+    await categoryViewModel.fetchcategoryByName(widget.examName);
+    final category = categoryViewModel.selectedcategory;
+
+    setState(() {
+      selectedCategory = category?["_id"]?.toString() ?? '';
+      print("Selected Category: $selectedCategory");
+    });
+  }
+
   // Function to pick a date
   Future<void> _selectDate(BuildContext context, DateTime? initialDate,
       Function(DateTime) onDateSelected) async {
@@ -136,7 +152,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     );
   }
 
-// Styled Date Picker
+  // Styled Date Picker
   Widget _buildDatePicker(
       String label, DateTime? selectedDate, Function(DateTime) onDateSelected) {
     return _styledCard(
@@ -159,7 +175,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     );
   }
 
-// Styled Checkbox with Date Picker
+  // Styled Checkbox with Date Picker
   Widget _buildCheckboxWithDate(
       String label,
       bool value,
@@ -186,7 +202,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     );
   }
 
-// Styled TextField
+  // Styled TextField
   Widget _buildTextField(TextEditingController controller, String label,
       {bool isNumber = false}) {
     return _styledCard(
@@ -208,6 +224,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   Widget build(BuildContext context) {
     final examViewModel = Provider.of<ExamViewModel>(context);
     double screenWidth = MediaQuery.of(context).size.width;
+    final categoryViewModel = Provider.of<CategoryViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(title: Text("Update Exam")),
@@ -229,6 +246,65 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                         child: Column(
                           children: [
                             _buildTextField(nameController, "Exam Name"),
+                            _styledCard(
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: DropdownButtonFormField<String>(
+                                        isExpanded: true,
+                                        decoration: InputDecoration(
+                                          hintText: "Select Category",
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            borderSide: BorderSide(
+                                              color: Colors.blue,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                        ),
+                                        value: selectedCategory,
+                                        items: categoryViewModel.categories
+                                            .map((category) => DropdownMenuItem(
+                                                  value:
+                                                      category["id"] as String,
+                                                  child: Text(
+                                                    category["name"] as String,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 3,
+                                                  ),
+                                                ))
+                                            .toList(),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedCategory = value;
+                                          });
+                                          print(
+                                              "Selected Category: $selectedCategory");
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
                             _buildDatePicker(
                                 "Application Begin Date",
                                 applicationBegin,
@@ -237,26 +313,27 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                             _buildDatePicker(
                                 "Last Date to Apply",
                                 lastDateToApply,
-                                (date) => setState(() => lastDateToApply = date)),
+                                (date) =>
+                                    setState(() => lastDateToApply = date)),
                             _buildDatePicker(
                                 "Last Date to Pay Exam Fee",
                                 lastDateToPayExamFee,
-                                (date) =>
-                                    setState(() => lastDateToPayExamFee = date)),
+                                (date) => setState(
+                                    () => lastDateToPayExamFee = date)),
                             _buildCheckboxWithDate(
                                 "Admit Card Available",
                                 isadmitCardAvailable,
                                 admitCardAvailable,
-                                (value) =>
-                                    setState(() => isadmitCardAvailable = value),
+                                (value) => setState(
+                                    () => isadmitCardAvailable = value),
                                 (date) =>
                                     setState(() => admitCardAvailable = date)),
                             _buildCheckboxWithDate(
                                 "Answer Key Available",
                                 isanswerKeyAvailable,
                                 answerKeyAvailable,
-                                (value) =>
-                                    setState(() => isanswerKeyAvailable = value),
+                                (value) => setState(
+                                    () => isanswerKeyAvailable = value),
                                 (date) =>
                                     setState(() => answerKeyAvailable = date)),
                             _buildCheckboxWithDate(
@@ -265,8 +342,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                 syllabusAvailableDate,
                                 (value) =>
                                     setState(() => syllabusAvailable = value),
-                                (date) =>
-                                    setState(() => syllabusAvailableDate = date)),
+                                (date) => setState(
+                                    () => syllabusAvailableDate = date)),
                             _buildCheckboxWithDate(
                                 "Result Available",
                                 resultAvailable,
@@ -304,19 +381,20 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                 if (_formKey.currentState!.validate()) {
                                   Map<String, dynamic> updatedExam = {
                                     "name": nameController.text,
+                                    "examCategory": selectedCategory,
                                     "minAge": int.parse(minAgeController.text),
                                     "maxAge": int.parse(maxAgeController.text),
                                     "generalCategoryFee": int.parse(
                                         generalCategoryFeeController.text),
-                                    "obcCategoryFee":
-                                        int.parse(obcCategoryFeeController.text),
-                                    "ewsCategoryFee":
-                                        int.parse(ewsCategoryFeeController.text),
-                                    "scstCategoryFee":
-                                        int.parse(scstCategoryFeeController.text),
+                                    "obcCategoryFee": int.parse(
+                                        obcCategoryFeeController.text),
+                                    "ewsCategoryFee": int.parse(
+                                        ewsCategoryFeeController.text),
+                                    "scstCategoryFee": int.parse(
+                                        scstCategoryFeeController.text),
                                     "phCategoryFee":
                                         int.parse(phCategoryFeeController.text),
-                
+
                                     // Store Dates (Convert to ISO format)
                                     "applicationBegin":
                                         applicationBegin?.toIso8601String(),
@@ -329,19 +407,22 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                     "answerKeyAvailable":
                                         answerKeyAvailable?.toIso8601String(),
                                     "syllabusAvailableDate":
-                                        syllabusAvailableDate?.toIso8601String(),
+                                        syllabusAvailableDate
+                                            ?.toIso8601String(),
                                     "resultPostingDate":
                                         resultPostingDate?.toIso8601String(),
                                     "examDate": examDate?.toIso8601String(),
                                     "ageFrom": ageFrom?.toIso8601String(),
-                
+
                                     // Store Boolean Values
-                                    "isadmitCardAvailable": isadmitCardAvailable,
-                                    "isanswerKeyAvailable": isanswerKeyAvailable,
+                                    "isadmitCardAvailable":
+                                        isadmitCardAvailable,
+                                    "isanswerKeyAvailable":
+                                        isanswerKeyAvailable,
                                     "syllabusAvailable": syllabusAvailable,
                                     "resultAvailable": resultAvailable,
                                   };
-                
+
                                   await examViewModel.updateExam(
                                       widget.id, updatedExam);
                                   ScaffoldMessenger.of(context).showSnackBar(

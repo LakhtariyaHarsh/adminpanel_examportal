@@ -6,4 +6,8 @@ class ApiEndpoints {
   static const String examscreate = "/exams/create";
   static const String examsupdate = "/exams/update";
   static const String examsdelete = "/exams/delete";
+  static const String category = "/categories";
+  static const String categorycreate = "/categories/create";
+  static const String categoryupdate = "/categories/update";
+  static const String categorydelete = "/categories/delete";
 }

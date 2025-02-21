@@ -1,37 +1,37 @@
+import 'package:admin_panel/view_models/Category_view_model.dart';
+import 'package:admin_panel/views/admin_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../view_models/exam_view_model.dart';
 import '../view_models/auth_view_model.dart';
 import 'add_exam_screen.dart';
 import 'update_exam_screen.dart';
 import 'login_screen.dart';
-import 'category.dart' as category_view;
 
-class AdminDashboard extends StatefulWidget {
+class Category extends StatefulWidget {
   @override
-  State<AdminDashboard> createState() => _AdminDashboardState();
+  State<Category> createState() => _CategoryState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard> {
+class _CategoryState extends State<Category> {
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
-    final examViewModel = Provider.of<ExamViewModel>(context);
+    final categoryViewModel = Provider.of<CategoryViewModel>(context);
     final authViewModel = Provider.of<AuthViewModel>(context);
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Filter exams based on search query
-    final filteredExams = examViewModel.exams.where((exam) {
-      final name = exam["name"]?.toLowerCase() ?? "";
+    final filteredcategories = categoryViewModel.categories.where((category) {
+      final name = category["categoryName"]?.toLowerCase() ?? "";
       return name.contains(_searchQuery.toLowerCase());
     }).toList();
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-        title: Text("Admin Dashboard Exams" ,style: TextStyle(color: Colors.white),),
+        title: Text("CATEGORIES" ,style: TextStyle(color: Colors.white),),
         actions: [
           Row(
             children: [
@@ -39,10 +39,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => category_view.Category()),
+                    MaterialPageRoute(builder: (context) => AdminDashboard()),
                   );
                 },
-                child: Text("Category", style: TextStyle(color: Colors.white)),
+                child: Text("Exams", style: TextStyle(color: Colors.white)),
               ),
               TextButton(
                 onPressed: () {
@@ -76,7 +76,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         },
         child: Icon(Icons.add),
       ),
-      body: examViewModel.isLoading
+      body: categoryViewModel.isLoading
           ? Center(child: CircularProgressIndicator())
           : Center(
               child: Container(
@@ -108,16 +108,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       Expanded(
                         child: ListView.builder(
                           shrinkWrap: true,
-                          itemCount: filteredExams.length,
+                          itemCount: filteredcategories.length,
                           itemBuilder: (context, index) {
-                            final exam = filteredExams[index];
+                            final category = filteredcategories[index];
                             return Card(
                               margin: EdgeInsets.symmetric(vertical: 10),
                               elevation: 4,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               child: ListTile(
                                 title: Text(
-                                  exam["name"] ?? "",
+                                  category["name"] ?? "",
                                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                                 ),
                                 trailing: SizedBox(
@@ -132,8 +132,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => UpdateExamScreen(
-                                                examName: exam["name"] ?? "",
-                                                id: exam["id"] ?? "",
+                                                examName: category["name"] ?? "",
+                                                id: category["id"] ?? ""
                                               ),
                                             ),
                                           );
@@ -142,7 +142,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       IconButton(
                                         icon: Icon(Icons.delete, color: Colors.red),
                                         onPressed: () {
-                                          examViewModel.deleteExam(exam["id"] ?? "");
+                                          categoryViewModel.deletecategory(category["id"] ?? "");
                                         },
                                       ),
                                     ],

@@ -1,3 +1,4 @@
+import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/exam_view_model.dart';
@@ -34,6 +35,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
   DateTime? resultPostingDate;
   DateTime? examDate;
   DateTime? ageFrom;
+   
+  String? selectedCategory;
 
   bool isAdmitCardAvailable = false;
   bool isAnswerKeyAvailable = false;
@@ -68,7 +71,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
     );
   }
 
-// Styled Date Picker
+  // Styled Date Picker
   Widget _buildDatePicker(
       String label, DateTime? selectedDate, Function(DateTime) onDateSelected) {
     return _styledCard(
@@ -91,7 +94,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
     );
   }
 
-// Styled Checkbox with Date Picker
+  // Styled Checkbox with Date Picker
   Widget _buildCheckboxWithDate(
       String label,
       bool value,
@@ -118,7 +121,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
     );
   }
 
-// Styled TextField
+  // Styled TextField
   Widget _buildTextField(TextEditingController controller, String label,
       {bool isNumber = false}) {
     return _styledCard(
@@ -140,6 +143,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
   Widget build(BuildContext context) {
     final examViewModel = Provider.of<ExamViewModel>(context);
     double screenWidth = MediaQuery.of(context).size.width;
+    final categoryViewModel = Provider.of<CategoryViewModel>(context);
+
 
     return Scaffold(
       appBar: AppBar(title: Text("Add Exam")),
@@ -147,7 +152,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
         child: Center(
           child: Card(
             margin: EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             elevation: 4,
             child: Padding(
               padding: EdgeInsets.all(16.0),
@@ -158,66 +164,133 @@ class _AddExamScreenState extends State<AddExamScreen> {
                   child: Column(
                     children: [
                       _buildTextField(nameController, "Exam Name"),
-                
-                      _buildDatePicker("Application Begin Date", applicationBegin,
+
+                      _styledCard(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: DropdownButtonFormField<String>(
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    hintText: "Select Category",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color: Colors.blue,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                  ),
+                                  value: selectedCategory,
+                                  items: categoryViewModel.categories
+                                      .map((category) => DropdownMenuItem(
+                                            value: category["id"] as String,
+                                            child: Text(
+                                              category["name"] as String,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 3,
+                                            ),
+                                          ))
+                                      .toList(),
+                                  onChanged:  (value) {
+                                    setState(() {
+                                      selectedCategory = value;
+                                    });
+                                    print("Selected Category: $selectedCategory");
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+
+                      _buildDatePicker(
+                          "Application Begin Date",
+                          applicationBegin,
                           (date) => setState(() => applicationBegin = date)),
-                
+
                       _buildDatePicker("Last Date to Apply", lastDateToApply,
                           (date) => setState(() => lastDateToApply = date)),
-                
+
                       _buildDatePicker(
                           "Last Date to Pay Exam Fee",
                           lastDateToPayExamFee,
-                          (date) => setState(() => lastDateToPayExamFee = date)),
-                
+                          (date) =>
+                              setState(() => lastDateToPayExamFee = date)),
+
                       _buildCheckboxWithDate(
                           "Admit Card Available",
                           isAdmitCardAvailable,
                           admitCardAvailable,
-                          (value) => setState(() => isAdmitCardAvailable = value),
+                          (value) =>
+                              setState(() => isAdmitCardAvailable = value),
                           (date) => setState(() => admitCardAvailable = date)),
-                
+
                       _buildCheckboxWithDate(
                           "Answer Key Available",
                           isAnswerKeyAvailable,
                           answerKeyAvailable,
-                          (value) => setState(() => isAnswerKeyAvailable = value),
+                          (value) =>
+                              setState(() => isAnswerKeyAvailable = value),
                           (date) => setState(() => answerKeyAvailable = date)),
-                
+
                       _buildCheckboxWithDate(
                           "Syllabus Available",
                           syllabusAvailable,
                           syllabusAvailableDate,
                           (value) => setState(() => syllabusAvailable = value),
-                          (date) => setState(() => syllabusAvailableDate = date)),
-                
+                          (date) =>
+                              setState(() => syllabusAvailableDate = date)),
+
                       _buildCheckboxWithDate(
                           "Result Available",
                           resultAvailable,
                           resultPostingDate,
                           (value) => setState(() => resultAvailable = value),
                           (date) => setState(() => resultPostingDate = date)),
-                
+
                       _buildDatePicker("Exam Date", examDate,
                           (date) => setState(() => examDate = date)),
-                
+
                       _buildDatePicker("Age From", ageFrom,
                           (date) => setState(() => ageFrom = date)),
-                
-                      _buildTextField(minAgeController, "Min Age", isNumber: true),
-                      _buildTextField(maxAgeController, "Max Age", isNumber: true),
+
+                      _buildTextField(minAgeController, "Min Age",
+                          isNumber: true),
+                      _buildTextField(maxAgeController, "Max Age",
+                          isNumber: true),
                       _buildTextField(
                           generalCategoryFeeController, "General Category Fee",
                           isNumber: true),
-                      _buildTextField(obcCategoryFeeController, "OBC Category Fee",
+                      _buildTextField(
+                          obcCategoryFeeController, "OBC Category Fee",
                           isNumber: true),
-                      _buildTextField(ewsCategoryFeeController, "EWS Category Fee",
+                      _buildTextField(
+                          ewsCategoryFeeController, "EWS Category Fee",
                           isNumber: true),
-                      _buildTextField(scstCategoryFeeController, "SC/ST Category Fee",
+                      _buildTextField(
+                          scstCategoryFeeController, "SC/ST Category Fee",
                           isNumber: true),
-                      _buildTextField(phCategoryFeeController, "PH Category Fee",
+                      _buildTextField(
+                          phCategoryFeeController, "PH Category Fee",
                           isNumber: true),
-                
+
                       // Submit Button
                       SizedBox(height: 20),
                       ElevatedButton(
@@ -225,6 +298,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                           if (_formKey.currentState!.validate()) {
                             Map<String, dynamic> newExam = {
                               "name": nameController.text,
+                              "examCategory": selectedCategory,
                               "minAge": int.parse(minAgeController.text),
                               "maxAge": int.parse(maxAgeController.text),
                               "generalCategoryFee":
@@ -237,10 +311,12 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                   int.parse(scstCategoryFeeController.text),
                               "phCategoryFee":
                                   int.parse(phCategoryFeeController.text),
-                
+
                               // Store Dates (Convert to ISO format)
-                              "applicationBegin": applicationBegin?.toIso8601String(),
-                              "lastDateToApply": lastDateToApply?.toIso8601String(),
+                              "applicationBegin":
+                                  applicationBegin?.toIso8601String(),
+                              "lastDateToApply":
+                                  lastDateToApply?.toIso8601String(),
                               "lastDateToPayExamFee":
                                   lastDateToPayExamFee?.toIso8601String(),
                               "admitCardAvailable":
@@ -253,22 +329,23 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                   resultPostingDate?.toIso8601String(),
                               "examDate": examDate?.toIso8601String(),
                               "ageFrom": ageFrom?.toIso8601String(),
-                
+
                               // Store Boolean Values
                               "isAdmitCardAvailable": isAdmitCardAvailable,
                               "isAnswerKeyAvailable": isAnswerKeyAvailable,
                               "syllabusAvailable": syllabusAvailable,
                               "resultAvailable": resultAvailable,
                             };
-                
+
                             // Call ViewModel to add exam
                             await examViewModel.addExam(newExam);
-                
+
                             // Show success message
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Exam added successfully!")),
+                              SnackBar(
+                                  content: Text("Exam added successfully!")),
                             );
-                
+
                             // Close screen
                             Navigator.pop(context);
                           }

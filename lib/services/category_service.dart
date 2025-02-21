@@ -10,13 +10,13 @@ class CategoryService {
 
 
   // Fetch single Category by name
-  Future<Map<String, dynamic>> getCategoryByName(String categoryName) async {
+  Future<Map<String, dynamic>> getCategoryByid(String categoryId) async {
     try {
       Dio dio = await ApiClient.getDio();
-      Response response = await dio.get("/categories/$categoryName");
+      Response response = await dio.get("/categories/categorybyid/$categoryId");
       return response.data;
     } catch (e) {
-      print("Fetch Category by Name Error: $e");
+      print("Fetch Category by id Error: $e");
       throw Exception("Failed to load Category details: $e");
     }
   }

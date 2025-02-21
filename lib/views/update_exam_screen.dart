@@ -6,8 +6,10 @@ import '../view_models/exam_view_model.dart';
 class UpdateExamScreen extends StatefulWidget {
   final String examName;
   final String id;
+  final String categoryid;
 
-  UpdateExamScreen({required this.examName, required this.id});
+  UpdateExamScreen(
+      {required this.examName, required this.id, required this.categoryid});
 
   @override
   _UpdateExamScreenState createState() => _UpdateExamScreenState();
@@ -37,7 +39,9 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   DateTime? examDate;
   DateTime? ageFrom;
 
+  // Selected category id and name
   String? selectedCategory;
+  String? selectedCategoryName;
 
   bool isadmitCardAvailable = false;
   bool isanswerKeyAvailable = false;
@@ -49,10 +53,45 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   @override
   void initState() {
     super.initState();
-    fetchExamData();
-    fetchCategoryData();
+    intializedData();
   }
 
+  Future<void> intializedData() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      await fetchCategoryData();
+      await fetchExamData();
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print("Initialization error: $e");
+    }
+  }
+
+  // Fetch category data by widget.categoryid and store its name.
+  Future<void> fetchCategoryData() async {
+    final categoryViewModel =
+        Provider.of<CategoryViewModel>(context, listen: false);
+    final category =
+        await categoryViewModel.fetchcategoryById(widget.categoryid);
+    // Expecting category to be a map with "categoryName" key.
+    if (category != null) {
+      setState(() {
+        selectedCategoryName = category["categoryName"]?.toString() ?? '';
+      });
+      print("Selected Category: $selectedCategoryName");
+    } else {
+      print("No category found for id: ${widget.categoryid}");
+    }
+  }
+
+  // Fetch exam details by name and store selected category name from exam data if available.
   Future<void> fetchExamData() async {
     final examViewModel = Provider.of<ExamViewModel>(context, listen: false);
     await examViewModel.fetchExamByName(widget.examName);
@@ -61,7 +100,16 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     if (exam != null) {
       setState(() {
         nameController = TextEditingController(text: exam["name"]);
-        selectedCategory = exam["category"]["id"];
+        // If exam contains examCategory, extract its _id (if it is a map) or use the value directly.
+        if (exam["examCategory"] != null) {
+          selectedCategory = exam["examCategory"] is Map
+              ? exam["examCategory"]["_id"].toString()
+              : exam["examCategory"].toString();
+          // Optionally, if exam data contains category name (for instance, exam["categoryName"]), use that:
+          if (exam["categoryName"] != null) {
+            selectedCategoryName = exam["categoryName"].toString();
+          }
+        }
         minAgeController =
             TextEditingController(text: exam["minAge"]?.toString() ?? '');
         maxAgeController =
@@ -107,21 +155,10 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
         isanswerKeyAvailable = exam["isanswerKeyAvailable"] ?? false;
         syllabusAvailable = exam["syllabusAvailable"] ?? false;
         resultAvailable = exam["resultAvailable"] ?? false;
-
-        isLoading = false;
       });
+    } else {
+      print("No exam data found for ${widget.examName}");
     }
-  }
-
-  Future<void> fetchCategoryData() async {
-    final categoryViewModel = Provider.of<CategoryViewModel>(context, listen: false);
-    await categoryViewModel.fetchcategoryByName(widget.examName);
-    final category = categoryViewModel.selectedcategory;
-
-    setState(() {
-      selectedCategory = category?["_id"]?.toString() ?? '';
-      print("Selected Category: $selectedCategory");
-    });
   }
 
   // Function to pick a date

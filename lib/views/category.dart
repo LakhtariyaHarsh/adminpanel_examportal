@@ -128,15 +128,15 @@ class _CategoryState extends State<Category> {
                                       IconButton(
                                         icon: Icon(Icons.edit, color: Colors.blue),
                                         onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => UpdateExamScreen(
-                                                examName: category["name"] ?? "",
-                                                id: category["id"] ?? ""
-                                              ),
-                                            ),
-                                          );
+                                          // Navigator.push(
+                                          //   context,
+                                          //   MaterialPageRoute(
+                                          //     builder: (context) => UpdateExamScreen(
+                                          //       examName: category["name"] ?? "",
+                                          //       id: category["id"] ?? ""
+                                          //     ),
+                                          //   ),
+                                          // );
                                         },
                                       ),
                                       IconButton(

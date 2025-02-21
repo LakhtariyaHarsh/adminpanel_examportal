@@ -78,14 +78,14 @@ class CategoryViewModel extends ChangeNotifier {
 
 
   /// Fetch a single category by name
-  Future<Map<String, dynamic>?> fetchcategoryByName(String name) async {
+  Future<Map<String, dynamic>?> fetchcategoryById(String id) async {
     _setLoading(true);
     try {
-      var data = await categoryService.getCategoryByName(name);
+      var data = await categoryService.getCategoryByid(id);
       selectedcategory = data; // Store the category data
       return data;
     } catch (e) {
-      print("Error fetching category by name: $e");
+      print("Error fetching category by id: $e");
       selectedcategory = null;
       return null;
     }

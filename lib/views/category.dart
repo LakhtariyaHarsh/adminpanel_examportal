@@ -1,10 +1,10 @@
 import 'package:admin_panel/view_models/Category_view_model.dart';
+import 'package:admin_panel/views/add_category.dart';
 import 'package:admin_panel/views/admin_dashboard.dart';
+import 'package:admin_panel/views/update_category.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/auth_view_model.dart';
-import 'add_exam_screen.dart';
-import 'update_exam_screen.dart';
 import 'login_screen.dart';
 
 class Category extends StatefulWidget {
@@ -72,7 +72,7 @@ class _CategoryState extends State<Category> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => AddExamScreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => AddCategoryScreen()));
         },
         child: Icon(Icons.add),
       ),
@@ -128,15 +128,13 @@ class _CategoryState extends State<Category> {
                                       IconButton(
                                         icon: Icon(Icons.edit, color: Colors.blue),
                                         onPressed: () {
-                                          // Navigator.push(
-                                          //   context,
-                                          //   MaterialPageRoute(
-                                          //     builder: (context) => UpdateExamScreen(
-                                          //       examName: category["name"] ?? "",
-                                          //       id: category["id"] ?? ""
-                                          //     ),
-                                          //   ),
-                                          // );
+                                          print(category["id"]);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => UpdateCategory(id: category["id"] ?? "")
+                                            ),
+                                          );
                                         },
                                       ),
                                       IconButton(

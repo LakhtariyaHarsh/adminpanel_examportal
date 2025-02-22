@@ -119,45 +119,46 @@ class _AdminDashboardState extends State<AdminDashboard> {
         backgroundColor: const Color.fromARGB(255, 146, 156, 160),
         title: Text("Admin Dashboard Exams",
             style: TextStyle(color: Colors.white)),
-        actions:screenWidth >= 720? [
-          Row(
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => category_view.Category()),
-                  );
-                },
-                child: Text("Category", style: TextStyle(color: Colors.white)),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Navigate to Posts Screen (Replace with actual screen)
-                },
-                child: Text("Posts", style: TextStyle(color: Colors.white)),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Navigate to Eligibility Screen (Replace with actual screen)
-                },
-                child:
-                    Text("Eligibility", style: TextStyle(color: Colors.white)),
-              ),
-              IconButton(
-                icon: Icon(Icons.logout, color: Colors.white),
-                onPressed: () {
-                  authViewModel.logout();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-              ),
-            ],
-          ),
-        ]:null,
+        actions: screenWidth >= 720
+            ? [
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        context.go('/categories');
+                      },
+                      child: Text("Category",
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Navigate to Posts Screen (Replace with actual screen)
+                      },
+                      child:
+                          Text("Posts", style: TextStyle(color: Colors.white)),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Navigate to Eligibility Screen (Replace with actual screen)
+                      },
+                      child: Text("Eligibility",
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.logout, color: Colors.white),
+                      onPressed: () {
+                        authViewModel.logout();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LoginScreen()),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ]
+            : null,
       ),
       drawer: isMobile
           ? Drawer(
@@ -238,7 +239,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-         context.go('/exams/add');
+          context.go('/exams/add');
         },
         child: Icon(Icons.add),
       ),
@@ -318,19 +319,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                             color: Colors.blue),
                                         onPressed: () {
                                           print(exam["examcategory"]);
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  UpdateExamScreen(
-                                                      examName:
-                                                          exam["name"] ?? "",
-                                                      id: exam["id"] ?? "",
-                                                      categoryid: exam[
-                                                              "examcategory"] ??
-                                                          ""),
-                                            ),
-                                          );
+                                          context.go(
+                                              '/exams/update/${exam["id"]}/${Uri.encodeComponent(exam["name"] ?? "")}/${exam["examcategory"] ?? ""}');
                                         },
                                       ),
                                       IconButton(

@@ -110,38 +110,41 @@ class _CategoryState extends State<Category> {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 146, 156, 160),
         title: Text("CATEGORIES", style: TextStyle(color: Colors.white)),
-        actions: screenWidth >= 720?[
-          Row(
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AdminDashboard()));
-                },
-                child: Text("Exams", style: TextStyle(color: Colors.white)),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Text("Posts", style: TextStyle(color: Colors.white)),
-              ),
-              TextButton(
-                onPressed: () {},
-                child:
-                    Text("Eligibility", style: TextStyle(color: Colors.white)),
-              ),
-              IconButton(
-                icon: Icon(Icons.logout, color: Colors.white),
-                onPressed: () {
-                  authViewModel.logout();
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()));
-                },
-              ),
-            ],
-          ),
-        ]:null,
+        actions: screenWidth >= 720
+            ? [
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                       context.go('/');
+                      },
+                      child:
+                          Text("Exams", style: TextStyle(color: Colors.white)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child:
+                          Text("Posts", style: TextStyle(color: Colors.white)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text("Eligibility",
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.logout, color: Colors.white),
+                      onPressed: () {
+                        authViewModel.logout();
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginScreen()));
+                      },
+                    ),
+                  ],
+                ),
+              ]
+            : null,
       ),
       drawer: isMobile
           ? Drawer(
@@ -222,8 +225,7 @@ class _CategoryState extends State<Category> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddCategoryScreen()));
+          context.go('/categories/add');
         },
         child: Icon(Icons.add),
       ),
@@ -301,14 +303,8 @@ class _CategoryState extends State<Category> {
                                         icon: Icon(Icons.edit,
                                             color: Colors.blue),
                                         onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  UpdateCategory(
-                                                      id: category["id"] ?? ""),
-                                            ),
-                                          );
+                                          context.go(
+                                              '/categories/update/${category["id"]}');
                                         },
                                       ),
                                       IconButton(

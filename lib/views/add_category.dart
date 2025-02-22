@@ -1,5 +1,6 @@
 import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class AddCategoryScreen extends StatefulWidget {
@@ -95,7 +96,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             );
 
                             // Close screen
-                            Navigator.pop(context);
+                            context.go('/categories');
                           }
                         },
                         child: Text("Add category"),

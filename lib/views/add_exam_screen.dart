@@ -1,5 +1,6 @@
 import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../view_models/exam_view_model.dart';
 
@@ -352,7 +353,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                             );
 
                             // Close screen
-                            Navigator.pop(context);
+                            context.go('/exams');
                           }
                         },
                         child: Text("Add Exam"),

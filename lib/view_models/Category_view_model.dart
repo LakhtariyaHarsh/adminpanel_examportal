@@ -5,12 +5,16 @@ class CategoryViewModel extends ChangeNotifier {
   final CategoryService categoryService = CategoryService();
 
   List<Map<String, String>> categories = [];
+  List<Map<String, dynamic>> _searchResults = [];
   Map<String, dynamic>? selectedcategory; // Holds the fetched category details
 
   bool isLoading = false;
+   String? errorMessage;
   int page = 1;
   int limit = 10;
   int totalPages = 1;
+
+  List<Map<String, dynamic>> get searchResults => _searchResults;
 
   CategoryViewModel() {
     fetchAllData();
@@ -27,11 +31,11 @@ class CategoryViewModel extends ChangeNotifier {
     _setLoading(false);
   }
 
-  /// Fetch all categorys with pagination
+  /// Fetch all categories with pagination
   Future<void> fetchcategorys() async {
     _setLoading(true);
     try {
-      var data = await categoryService.fetchCategory(1, limit);
+      var data = await categoryService.fetchCategory(page, limit);
       categories = data["categories"].map<Map<String, String>>((category) {
         return {
           "id": category["_id"].toString(),
@@ -40,9 +44,38 @@ class CategoryViewModel extends ChangeNotifier {
       }).toList();
       totalPages = data["totalPages"];
     } catch (e) {
-      print("Error fetching categorys: $e");
+      print("Error fetching categories: $e");
     }
     _setLoading(false);
+  }
+
+  /// 🔹 Search Categories by Name
+  Future<void> searchCategories(String query) async {
+    if (query.isEmpty) {
+      _searchResults = []; // Clear search results
+      notifyListeners();
+      return;
+    }
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await categoryService.searchCategoryByName(query);
+      _searchResults = List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      errorMessage = "Failed to fetch search results";
+      _searchResults = [];
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Clear search results
+  void clearSearch() {
+    _searchResults = [];
+    notifyListeners();
   }
 
   /// Add a new category
@@ -65,7 +98,7 @@ class CategoryViewModel extends ChangeNotifier {
     }
   }
 
-  /// Delete an category
+  /// Delete a category
   Future<void> deletecategory(String id) async {
     try {
       await categoryService.deleteCategory(id);
@@ -76,8 +109,7 @@ class CategoryViewModel extends ChangeNotifier {
     }
   }
 
-
-  /// Fetch a single category by name
+  /// Fetch a single category by ID
   Future<Map<String, dynamic>?> fetchcategoryById(String id) async {
     _setLoading(true);
     try {
@@ -88,8 +120,9 @@ class CategoryViewModel extends ChangeNotifier {
       print("Error fetching category by id: $e");
       selectedcategory = null;
       return null;
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
   /// Set loading state and notify listeners

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/exam_service.dart';
 
 class ExamViewModel extends ChangeNotifier {
-  final ExamService examService = ExamService();
+  final ExamService _examService = ExamService();
 
   List<Map<String, String>> exams = [];
   List<Map<String, String>> buttonData = [];
@@ -10,7 +10,13 @@ class ExamViewModel extends ChangeNotifier {
   List<Map<String, String>> resultExamList = [];
   List<Map<String, String>> answerKeyExamList = [];
   List<Map<String, String>> syllabusExamList = [];
+  List<Map<String, dynamic>> _searchResults = [];
   Map<String, dynamic>? selectedExam; // Holds the fetched exam details
+
+  String? _errorMessage;
+
+  List<Map<String, dynamic>> get searchResults => _searchResults;
+  String? get errorMessage => _errorMessage;
 
   bool isLoading = false;
   int page = 1;
@@ -25,173 +31,202 @@ class ExamViewModel extends ChangeNotifier {
   Future<void> fetchAllData() async {
     _setLoading(true);
     try {
-      await fetchExams();
-      await fetchExamDataByLastdate();
-      await fetchExamsByAdmitCard();
-      await fetchExamsByResult();
-      await fetchExamsByAnswerKey();
-      await fetchExamsBySyllabus();
+      await Future.wait([
+        fetchExams(),
+        fetchExamDataByLastdate(),
+        fetchExamsByAdmitCard(),
+        fetchExamsByResult(),
+        fetchExamsByAnswerKey(),
+        fetchExamsBySyllabus(),
+      ]);
     } catch (e) {
-      print("Error fetching all data: $e");
+      _errorMessage = "Error fetching data: $e";
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
   /// Fetch all exams with pagination
   Future<void> fetchExams() async {
     _setLoading(true);
     try {
-      var data = await examService.fetchExams(1, limit);
-      exams = data["exams"].map<Map<String, String>>((exam) {
-        return {
+      var data = await _examService.fetchExams(page, limit);
+      exams = List<Map<String, String>>.from(
+        data["exams"].map((exam) => {
           "id": exam["_id"].toString(),
           "name": exam["name"].toString(),
-        };
-      }).toList();
+        }),
+      );
       totalPages = data["totalPages"];
     } catch (e) {
-      print("Error fetching exams: $e");
+      _errorMessage = "Error fetching exams: $e";
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
-  /// Add a new exam
+  /// 🔹 Search Exams by Name
+  Future<void> searchExams(String query) async {
+    if (query.isEmpty) return;
+
+    _setLoading(true);
+    _errorMessage = null;
+    try {
+      _searchResults = await _examService.searchExamsByName(query);
+    } catch (e) {
+      _errorMessage = "Failed to fetch search results: $e";
+      _searchResults = [];
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// 🔹 Clear Search Results
+  void clearSearch() {
+    _searchResults = [];
+    notifyListeners();
+  }
+
+  /// 🔹 Fetch Single Exam by Name
+  Future<void> fetchExamByName(String name) async {
+    _setLoading(true);
+    try {
+      selectedExam = await _examService.getExamByName(name);
+    } catch (e) {
+      _errorMessage = "Error fetching exam: $e";
+      selectedExam = null;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// 🔹 Add a New Exam
   Future<void> addExam(Map<String, dynamic> examData) async {
     try {
-      await examService.addExam(examData);
+      await _examService.addExam(examData);
       await fetchExams(); // Refresh list after adding
     } catch (e) {
-      print("Error adding exam: $e");
+      _errorMessage = "Error adding exam: $e";
     }
   }
 
-  /// Update an existing exam
+  /// 🔹 Update an Exam
   Future<void> updateExam(String id, Map<String, dynamic> updatedData) async {
     try {
-      await examService.updateExam(id, updatedData);
+      await _examService.updateExam(id, updatedData);
       await fetchExams(); // Refresh list after updating
     } catch (e) {
-      print("Error updating exam: $e");
+      _errorMessage = "Error updating exam: $e";
     }
   }
 
-  /// Delete an exam
+  /// 🔹 Delete an Exam
   Future<void> deleteExam(String id) async {
     try {
-      await examService.deleteExam(id);
+      await _examService.deleteExam(id);
       exams.removeWhere((exam) => exam['id'] == id);
       notifyListeners();
     } catch (e) {
-      print("Error deleting exam: $e");
+      _errorMessage = "Error deleting exam: $e";
     }
   }
 
-  /// Fetch exams sorted by last date to apply
+  /// 🔹 Fetch Exams by Last Date to Apply
   Future<void> fetchExamDataByLastdate() async {
     _setLoading(true);
     try {
-      var data = await examService.getExamsByLastDateToApply(page, 9);
-      buttonData = data["exams"].map<Map<String, String>>((exam) {
-        return {
+      var data = await _examService.getExamsByLastDateToApply(page, 9);
+      buttonData = List<Map<String, String>>.from(
+        data["exams"].map((exam) => {
           "id": exam["_id"].toString(),
           "name": exam["name"].toString(),
-        };
-      }).toList();
+        }),
+      );
       totalPages = data["totalPages"];
     } catch (e) {
-      print("Error fetching exams by last date: $e");
+      _errorMessage = "Error fetching exams by last date: $e";
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
-  /// Fetch exams where admit card is available
+  /// 🔹 Fetch Exams where Admit Card is Available
   Future<void> fetchExamsByAdmitCard() async {
     _setLoading(true);
     try {
-      var data = await examService.getExamsByAdmitCard(page, limit);
-      admitCardExamList = data["exams"].map<Map<String, String>>((exam) {
-        return {
+      var data = await _examService.getExamsByAdmitCard(page, limit);
+      admitCardExamList = List<Map<String, String>>.from(
+        data["exams"].map((exam) => {
           "id": exam["_id"].toString(),
           "name": exam["name"].toString(),
-        };
-      }).toList();
+        }),
+      );
       totalPages = data["totalPages"];
     } catch (e) {
-      print("Error fetching exams by admit card: $e");
+      _errorMessage = "Error fetching admit card exams: $e";
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
-  /// Fetch exams where result is available
+  /// 🔹 Fetch Exams where Result is Available
   Future<void> fetchExamsByResult() async {
     _setLoading(true);
     try {
-      var data = await examService.getExamsByResult(page, limit);
-      resultExamList = data["exams"].map<Map<String, String>>((exam) {
-        return {
+      var data = await _examService.getExamsByResult(page, limit);
+      resultExamList = List<Map<String, String>>.from(
+        data["exams"].map((exam) => {
           "id": exam["_id"].toString(),
           "name": exam["name"].toString(),
-        };
-      }).toList();
+        }),
+      );
       totalPages = data["totalPages"];
     } catch (e) {
-      print("Error fetching exams by result: $e");
+      _errorMessage = "Error fetching result exams: $e";
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
-  /// Fetch exams where answer key is available
+  /// 🔹 Fetch Exams where Answer Key is Available
   Future<void> fetchExamsByAnswerKey() async {
     _setLoading(true);
     try {
-      var data = await examService.getExamsByAnswerKey(page, limit);
-      answerKeyExamList = data["exams"].map<Map<String, String>>((exam) {
-        return {
+      var data = await _examService.getExamsByAnswerKey(page, limit);
+      answerKeyExamList = List<Map<String, String>>.from(
+        data["exams"].map((exam) => {
           "id": exam["_id"].toString(),
           "name": exam["name"].toString(),
-        };
-      }).toList();
+        }),
+      );
       totalPages = data["totalPages"];
     } catch (e) {
-      print("Error fetching exams by answer key: $e");
+      _errorMessage = "Error fetching answer key exams: $e";
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
-  /// Fetch exams where syllabus is available
+  /// 🔹 Fetch Exams where Syllabus is Available
   Future<void> fetchExamsBySyllabus() async {
     _setLoading(true);
     try {
-      var data = await examService.getExamsBySyllabus(page, limit);
-      syllabusExamList = data["exams"].map<Map<String, String>>((exam) {
-        return {
+      var data = await _examService.getExamsBySyllabus(page, limit);
+      syllabusExamList = List<Map<String, String>>.from(
+        data["exams"].map((exam) => {
           "id": exam["_id"].toString(),
           "name": exam["name"].toString(),
-        };
-      }).toList();
+        }),
+      );
       totalPages = data["totalPages"];
     } catch (e) {
-      print("Error fetching exams by syllabus: $e");
+      _errorMessage = "Error fetching syllabus exams: $e";
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
-  /// Fetch a single exam by name
-  Future<Map<String, dynamic>?> fetchExamByName(String name) async {
-    _setLoading(true);
-    try {
-      var data = await examService.getExamByName(name);
-      selectedExam = data; // Store the exam data
-      return data;
-    } catch (e) {
-      print("Error fetching exam by name: $e");
-      selectedExam = null;
-      return null;
-    }
-    _setLoading(false);
-  }
-
-  /// Set loading state and notify listeners
+  /// 🔹 Set Loading State
   void _setLoading(bool value) {
     isLoading = value;
     notifyListeners();

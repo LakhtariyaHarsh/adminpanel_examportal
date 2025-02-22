@@ -1,5 +1,7 @@
 import 'package:admin_panel/services/exam_service.dart';
+import 'package:admin_panel/view_models/exam_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../view_models/auth_view_model.dart';
 import 'add_exam_screen.dart';
@@ -103,20 +105,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
+    final examViewModel = Provider.of<ExamViewModel>(context);
+    final isSearching = _searchQuery.isNotEmpty;
+    final displayedExams = isSearching ? examViewModel.searchResults : examList;
+    final double screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Filter exams based on search query
-    final filteredExams = examList.where((exam) {
-      final name = exam["name"]?.toLowerCase() ?? "";
-      return name.contains(_searchQuery.toLowerCase());
-    }).toList();
+    bool isMobile = screenWidth < 720;
+    bool isTablet = screenWidth >= 720 && screenWidth < 1024;
+    bool isDesktop = screenWidth >= 1024;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 146, 156, 160),
         title: Text("Admin Dashboard Exams",
             style: TextStyle(color: Colors.white)),
-        actions: [
+        actions:screenWidth >= 720? [
           Row(
             children: [
               TextButton(
@@ -154,12 +157,88 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
             ],
           ),
-        ],
+        ]:null,
       ),
+      drawer: isMobile
+          ? Drawer(
+              child: Container(
+                color: const Color(0xffe3e4e6),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: DrawerHeader(
+                        decoration: const BoxDecoration(
+                          color: Color.fromARGB(255, 244, 245, 246),
+                        ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.dashboard,
+                              size: 40,
+                              color: Colors.blueGrey,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              "ADMIN DASHBOARD",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.school,
+                                color: Colors.blueGrey),
+                            title: const Text("Exams"),
+                            onTap: () {
+                              context.go('/');
+                            },
+                          ),
+                          Divider(),
+                          ListTile(
+                            leading: const Icon(Icons.category,
+                                color: Colors.blueGrey),
+                            title: const Text("Category"),
+                            onTap: () {
+                              print("object");
+                              context.go('/categories');
+                            },
+                          ),
+                          Divider(),
+                          ListTile(
+                            leading: const Icon(Icons.article,
+                                color: Colors.blueGrey),
+                            title: const Text("Posts"),
+                            onTap: () {},
+                          ),
+                          Divider(),
+                          ListTile(
+                            leading: const Icon(Icons.verified_user,
+                                color: Colors.blueGrey),
+                            title: const Text("Eligibility"),
+                            onTap: () {},
+                          ),
+                          Divider(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddExamScreen()));
+         context.go('/exams/add');
         },
         child: Icon(Icons.add),
       ),
@@ -167,7 +246,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ? Center(child: CircularProgressIndicator())
           : Center(
               child: Container(
-                width: screenWidth * 0.7,
+                width: isDesktop ? screenWidth * 0.7 : screenWidth * 0.95,
                 color: Colors.blueGrey[50],
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
@@ -180,6 +259,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           setState(() {
                             _searchQuery = value;
                           });
+
+                          final examViewModel = Provider.of<ExamViewModel>(
+                              context,
+                              listen: false);
+
+                          if (value.isEmpty) {
+                            examViewModel
+                                .clearSearch(); // Clear results when search is empty
+                          } else {
+                            examViewModel.searchExams(value); // Perform search
+                          }
                         },
                         decoration: InputDecoration(
                           labelText: "Search Exams",
@@ -190,25 +280,22 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           fillColor: Colors.white,
                         ),
                       ),
+
                       SizedBox(height: 20),
                       // Exam List using ListView.builder with loader appended at the bottom
                       Expanded(
                         child: ListView.builder(
                           controller: _scrollController,
-                          itemCount:
-                              filteredExams.length + 1, // extra item for loader
+                          itemCount: displayedExams.length +
+                              1, // Extra item for loader
                           itemBuilder: (context, index) {
-                            if (index == filteredExams.length) {
-                              // Show loader at the bottom when loading more data
+                            if (index == displayedExams.length) {
                               return isLoadingMore
-                                  ? Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Center(
-                                          child: CircularProgressIndicator()),
-                                    )
+                                  ? Center(child: CircularProgressIndicator())
                                   : SizedBox();
                             }
-                            final exam = filteredExams[index];
+
+                            final exam = displayedExams[index];
                             return Card(
                               margin: EdgeInsets.symmetric(vertical: 10),
                               elevation: 4,

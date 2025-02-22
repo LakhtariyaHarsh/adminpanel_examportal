@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../view_models/auth_view_model.dart';
@@ -127,10 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     bool success = await authViewModel.login(email, password);
     if (success) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => AdminDashboard()),
-      );
+      context.push('/'); // ✅ Prevents multiple navigation calls
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(authViewModel.errorMessage ?? "Login Failed")),

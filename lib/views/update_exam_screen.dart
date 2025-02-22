@@ -260,11 +260,16 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   @override
   Widget build(BuildContext context) {
     final examViewModel = Provider.of<ExamViewModel>(context);
-    double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    bool isMobile = screenWidth < 720;
+    bool isTablet = screenWidth >= 720 && screenWidth < 1024;
+    bool isDesktop = screenWidth >= 1024;
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text("Update Exam")),
+      appBar: AppBar(backgroundColor: const Color.fromARGB(255, 146, 156, 160),
+          title: Text("Update Exam", style: TextStyle(color: Colors.white))),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -277,7 +282,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Container(
-                      width: screenWidth * 0.5,
+                      width: isDesktop ? screenWidth * 0.4 : isTablet ? screenWidth * 0.7 : screenWidth * 0.95,
                       child: Form(
                         key: _formKey,
                         child: Column(

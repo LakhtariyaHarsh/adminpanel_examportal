@@ -72,6 +72,20 @@ class ExamService {
     }
   }
 
+  // Fetch exams by search query (name)
+Future<List<Map<String, dynamic>>> searchExamsByName(String query) async {
+  try {
+    Dio dio = await ApiClient.getDio();
+    Response response = await dio.get("/exams/name", queryParameters: {"query": query});
+
+    return List<Map<String, dynamic>>.from(response.data);
+  } catch (e) {
+    print("Search Exam by Name Error: $e");
+    throw Exception("Failed to search exams: $e");
+  }
+}
+
+
   // Create a new exam
   Future<void> addExam(Map<String, dynamic> examData) async {
     try {

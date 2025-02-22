@@ -8,7 +8,6 @@ class CategoryService {
     return _fetchCategory(ApiEndpoints.category, page, limit);
   }
 
-
   // Fetch single Category by name
   Future<Map<String, dynamic>> getCategoryByid(String categoryId) async {
     try {
@@ -22,7 +21,8 @@ class CategoryService {
   }
 
   // Fetch Category Helper Method
-  Future<Map<String, dynamic>> _fetchCategory(String endpoint, int page, int limit,
+  Future<Map<String, dynamic>> _fetchCategory(
+      String endpoint, int page, int limit,
       [Map<String, dynamic>? additionalParams]) async {
     try {
       Dio dio = await ApiClient.getDio();
@@ -33,12 +33,27 @@ class CategoryService {
 
       Response response = await dio.get(endpoint, queryParameters: queryParams);
       return {
-        "categories": List<Map<String, dynamic>>.from(response.data["categories"]),
+        "categories":
+            List<Map<String, dynamic>>.from(response.data["categories"]),
         "totalPages": response.data["totalPages"]
       };
     } catch (e) {
       print("Fetch Category Error: $e");
       throw Exception("Failed to load Category: $e");
+    }
+  }
+
+  // Fetch exams by search query (name)
+  Future<List<Map<String, dynamic>>> searchCategoryByName(String query) async {
+    try {
+      Dio dio = await ApiClient.getDio();
+      Response response =
+          await dio.get("/categories/name", queryParameters: {"query": query});
+
+      return List<Map<String, dynamic>>.from(response.data);
+    } catch (e) {
+      print("Search categories by Name Error: $e");
+      throw Exception("Failed to search categories: $e");
     }
   }
 
@@ -54,11 +69,12 @@ class CategoryService {
   }
 
   // Update an existing Category
-  Future<void> updateCategory(String id, Map<String, dynamic> updatedData) async {
+  Future<void> updateCategory(
+      String id, Map<String, dynamic> updatedData) async {
     try {
       Dio dio = await ApiClient.getDio();
-      final response =
-          await dio.put("${ApiEndpoints.categoryupdate}/$id", data: updatedData);
+      final response = await dio.put("${ApiEndpoints.categoryupdate}/$id",
+          data: updatedData);
 
       print("Update Category Response: ${response.statusCode}");
       print("Response Data: ${response.data}");

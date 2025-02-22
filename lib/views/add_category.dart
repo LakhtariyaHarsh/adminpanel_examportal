@@ -13,7 +13,6 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   // Controllers for text fields
   final TextEditingController CategorynameController = TextEditingController();
 
-
   // Common Card Wrapper for styling
   Widget _styledCard(Widget child) {
     return Card(
@@ -27,7 +26,6 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       ),
     );
   }
-
 
   // Styled TextField
   Widget _buildTextField(TextEditingController controller, String label,
@@ -50,11 +48,16 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
-    double screenWidth = MediaQuery.of(context).size.width;
-
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    bool isMobile = screenWidth < 720;
+    bool isTablet = screenWidth >= 720 && screenWidth < 1024;
+    bool isDesktop = screenWidth >= 1024;
 
     return Scaffold(
-      appBar: AppBar(title: Text("Add category")),
+      appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 146, 156, 160),
+          title: Text("Add category", style: TextStyle(color: Colors.white))),
       body: SingleChildScrollView(
         child: Center(
           child: Card(
@@ -65,13 +68,12 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             child: Padding(
               padding: EdgeInsets.all(16.0),
               child: Container(
-                width: screenWidth * 0.5,
+                width: isDesktop ? screenWidth * 0.4 : isTablet ? screenWidth * 0.7 : screenWidth * 0.95,
                 child: Form(
                   key: _formKey,
                   child: Column(
                     children: [
                       _buildTextField(CategorynameController, "category Name"),
-                      
 
                       // Submit Button
                       SizedBox(height: 20),
@@ -79,7 +81,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             Map<String, dynamic> newcategory = {
-                              "categoryName": CategorynameController.text,                             
+                              "categoryName": CategorynameController.text,
                             };
 
                             // Call ViewModel to add category
@@ -88,7 +90,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             // Show success message
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text("category added successfully!")),
+                                  content:
+                                      Text("category added successfully!")),
                             );
 
                             // Close screen

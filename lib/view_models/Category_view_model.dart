@@ -82,7 +82,15 @@ class CategoryViewModel extends ChangeNotifier {
     _setLoading(true);
     try {
       final response = await categoryService.searchCategoryByName(query);
-      _searchResults = List<Map<String, dynamic>>.from(response);
+      // Map the search response to use the same keys.
+      _searchResults =
+          List<Map<String, dynamic>>.from(response).map((category) {
+        return {
+          "id": category["_id"].toString(),
+          // Use "name" as the key, whether it comes as "name" or "categoryName"
+          "name": category["name"] ?? category["categoryName"] ?? "",
+        };
+      }).toList();
     } catch (e) {
       errorMessage = "Failed to fetch search results";
       _searchResults = [];
@@ -109,7 +117,8 @@ class CategoryViewModel extends ChangeNotifier {
   }
 
   /// Update an existing category and refresh the list.
-  Future<void> updateCategory(String id, Map<String, dynamic> updatedData) async {
+  Future<void> updateCategory(
+      String id, Map<String, dynamic> updatedData) async {
     try {
       await categoryService.updateCategory(id, updatedData);
       page = 1;

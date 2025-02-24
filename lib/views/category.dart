@@ -239,7 +239,7 @@ class _CategoryState extends State<Category> {
                                   borderRadius: BorderRadius.circular(10)),
                               child: ListTile(
                                 title: Text(
-                                  category["name"] ?? "",
+                                  category["name"] ?? category["categoryName"] ?? "",
                                   style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500),

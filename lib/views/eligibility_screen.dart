@@ -1,27 +1,26 @@
-import 'package:admin_panel/view_models/exam_view_model.dart';
+import 'package:admin_panel/view_models/Eligibility_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../view_models/auth_view_model.dart';
-import 'add_exam_screen.dart';
-import 'update_exam_screen.dart';
-import 'login_screen.dart';
 
-class AdminDashboard extends StatefulWidget {
+class EligibilityScreen extends StatefulWidget {
   @override
-  State<AdminDashboard> createState() => _AdminDashboardState();
+  State<EligibilityScreen> createState() => _EligibilityState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard> {
+class _EligibilityState extends State<EligibilityScreen> {
   TextEditingController _searchController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  String _searchQuery = "";
+  ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    final examViewModel = Provider.of<ExamViewModel>(context, listen: false);
-    // Initially load exams
-    examViewModel.fetchExams();
+    final eligibilityViewModel =
+        Provider.of<EligibilityViewModel>(context, listen: false);
+    // Fetch initial categories.
+    eligibilityViewModel.fetchEligibilities();
     _scrollController.addListener(_scrollListener);
   }
 
@@ -32,53 +31,53 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.dispose();
   }
 
+  // Scroll listener that triggers load-more when near bottom.
   void _scrollListener() {
-    final examViewModel = Provider.of<ExamViewModel>(context, listen: false);
-    // When scrolled near the bottom, load more exams if needed.
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        !examViewModel.isLoadingMore &&
-        examViewModel.page < examViewModel.totalPages) {
-      examViewModel.page++;
-      examViewModel.fetchExams(isLoadMore: true);
+        _scrollController.position.maxScrollExtent - 200) {
+      final eligibilityViewModel =
+          Provider.of<EligibilityViewModel>(context, listen: false);
+      // If not loading and more pages exist, fetch more.
+      if (!eligibilityViewModel.isLoading && eligibilityViewModel.page < eligibilityViewModel.totalPages) {
+        eligibilityViewModel.fetchEligibilities(isLoadMore: true);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
-    final examViewModel = Provider.of<ExamViewModel>(context);
-    // If there is an active search (i.e. search controller is not empty)
-    // display search results, otherwise show full exams list.
-    final displayedExams = _searchController.text.isNotEmpty
-        ? examViewModel.searchResults
-        : examViewModel.exams;
+    final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
+    // If a search query is active, use the search results; otherwise, show the full list.
+    final bool isSearching = _searchQuery.isNotEmpty;
+    final List displaydEligibilities = isSearching
+        ? eligibilityViewModel.searchResults
+        : eligibilityViewModel.eligibilities;
+
     final double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 720;
-    bool isDesktop = screenWidth >= 1024;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-        title: Text("Admin Dashboard Exams",
-            style: TextStyle(color: Colors.white)),
+        title: Text("Eligibility", style: TextStyle(color: Colors.white)),
         actions: screenWidth >= 720
             ? [
                 Row(
                   children: [
                     TextButton(
                       onPressed: () {
-                        context.go('/categories');
+                        context.go('/');
                       },
-                      child: Text("Category",
+                      child: Text("Exams",
                           style: TextStyle(color: Colors.white)),
                     ),
                     TextButton(
                       onPressed: () {
-                         context.go('/posts');
+                        context.go('/posts');
                       },
-                      child: Text("Posts",
-                          style: TextStyle(color: Colors.white)),
+                      child:
+                          Text("Posts", style: TextStyle(color: Colors.white)),
                     ),
                     TextButton(
                       onPressed: () {
@@ -158,7 +157,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 color: Colors.blueGrey),
                             title: const Text("Posts"),
                             onTap: () {
-                               context.go('/posts');
+                              context.go('/posts');
                             },
                           ),
                           Divider(),
@@ -191,15 +190,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/exams/add');
+          context.go('/categories/add');
         },
         child: Icon(Icons.add),
       ),
-      body: examViewModel.isLoading && examViewModel.exams.isEmpty
+      body: eligibilityViewModel.isLoading && eligibilityViewModel.eligibilities.isEmpty
           ? Center(child: CircularProgressIndicator())
           : Center(
               child: Container(
-                width: isDesktop ? screenWidth * 0.7 : screenWidth * 0.95,
+                width: screenWidth >= 1024
+                    ? screenWidth * 0.7
+                    : screenWidth * 0.95,
                 color: Colors.blueGrey[50],
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
@@ -209,16 +210,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       TextField(
                         controller: _searchController,
                         onChanged: (value) {
-                          // If search query is empty, clear search results.
+                          setState(() {
+                            _searchQuery = value;
+                          });
                           if (value.isEmpty) {
-                            examViewModel.clearSearch();
+                            eligibilityViewModel.clearSearch();
                           } else {
-                            // Otherwise, perform search.
-                            examViewModel.searchExams(value);
+                            eligibilityViewModel.searchCategories(value);
                           }
                         },
                         decoration: InputDecoration(
-                          labelText: "Search Exams",
+                          labelText: "Search eligibilities",
                           prefixIcon: Icon(Icons.search),
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10)),
@@ -227,18 +229,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ),
                       ),
                       SizedBox(height: 20),
+                      // eligibility List
                       Expanded(
                         child: ListView.builder(
                           controller: _scrollController,
-                          itemCount: displayedExams.length +
-                              1, // Add extra item for a loading indicator if needed.
+                          itemCount: displaydEligibilities.length,
                           itemBuilder: (context, index) {
-                            if (index == displayedExams.length) {
-                              return examViewModel.isLoadingMore
-                                  ? Center(child: CircularProgressIndicator())
-                                  : SizedBox();
-                            }
-                            final exam = displayedExams[index];
+                            final eligibility = displaydEligibilities[index];
                             return Card(
                               margin: EdgeInsets.symmetric(vertical: 10),
                               elevation: 4,
@@ -246,7 +243,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                   borderRadius: BorderRadius.circular(10)),
                               child: ListTile(
                                 title: Text(
-                                  exam["name"] ?? "",
+                                  eligibility["name"] ?? eligibility["eligiblityCriteria"] ?? "",
                                   style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500),
@@ -259,55 +256,25 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       IconButton(
                                         icon: Icon(Icons.edit,
                                             color: Colors.blue),
-                                        onPressed: () async {
-                                          final updated = await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  UpdateExamScreen(
-                                                id: exam["id"] ?? "",
-                                                examName: exam["name"] ?? "",
-                                                categoryid:
-                                                    exam["examcategory"] ?? "",
-                                              ),
-                                            ),
-                                          );
-                                          if (updated == true) {
-                                            // After updating, refresh the exams list.
-                                            examViewModel.fetchExams();
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(
-                                                      "Exam updated successfully")),
-                                            );
-                                          }
+                                        onPressed: () {
+                                          context.go(
+                                              '/categories/update/${eligibility["id"]}');
                                         },
                                       ),
                                       IconButton(
                                         icon: Icon(Icons.delete,
                                             color: Colors.red),
                                         onPressed: () async {
-                                          bool success = await examViewModel
-                                                  .deleteExam(exam["id"] ?? "") ??
-                                              false;
-                                          if (success) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(
-                                                      "Exam deleted successfully")),
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(
-                                                      "Failed to delete exam")),
-                                            );
-                                          }
+                                          final id = eligibility["id"] ?? "";
+                                          await eligibilityViewModel.deleteEligibility(id);
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    "eligibility deleted successfully")),
+                                          );
                                         },
-                                      )
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -316,6 +283,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           },
                         ),
                       ),
+                      // Optional: A loader at the bottom when loading more data.
+                      if (eligibilityViewModel.isLoading && eligibilityViewModel.eligibilities.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
                     ],
                   ),
                 ),

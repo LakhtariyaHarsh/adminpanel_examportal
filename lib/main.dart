@@ -1,11 +1,12 @@
 import 'package:admin_panel/view_models/Category_view_model.dart';
+import 'package:admin_panel/view_models/Eligibility_view_model.dart';
+import 'package:admin_panel/view_models/post_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'view_models/auth_view_model.dart';
 import 'view_models/exam_view_model.dart';
-import 'views/login_screen.dart';
 import 'app_router.dart';
 
 void main() async {
@@ -18,6 +19,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => ExamViewModel()),
         ChangeNotifierProvider(create: (_) => CategoryViewModel()),
+        ChangeNotifierProvider(create: (_) => PostViewModel()),
+        ChangeNotifierProvider(create: (_) => EligibilityViewModel()),
       ],
       child: MyApp(initialRoute: initialRoute),
     ),

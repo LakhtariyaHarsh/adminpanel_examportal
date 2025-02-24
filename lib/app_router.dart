@@ -2,7 +2,9 @@ import 'package:admin_panel/views/add_category.dart';
 import 'package:admin_panel/views/add_exam_screen.dart';
 import 'package:admin_panel/views/admin_dashboard.dart';
 import 'package:admin_panel/views/category.dart';
+import 'package:admin_panel/views/eligibility_screen.dart';
 import 'package:admin_panel/views/login_screen.dart';
+import 'package:admin_panel/views/post_screen.dart';
 import 'package:admin_panel/views/update_category.dart';
 import 'package:admin_panel/views/update_exam_screen.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,16 @@ GoRouter getAppRouter(String initialRoute) {
         name: 'category',
         path: '/categories',
         pageBuilder: (context, state) => MaterialPage(child: Category()),
+      ),
+      GoRoute(
+        name: 'post',
+        path: '/posts',
+        pageBuilder: (context, state) => MaterialPage(child: PostScreen()),
+      ),
+      GoRoute(
+        name: 'eligibility',
+        path: '/eligibilities',
+        pageBuilder: (context, state) => MaterialPage(child: EligibilityScreen()),
       ),
       GoRoute(
         name: 'login',

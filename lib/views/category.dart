@@ -77,12 +77,16 @@ class _CategoryState extends State<Category> {
                           style: TextStyle(color: Colors.white)),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.go('/posts');
+                      },
                       child:
                           Text("Posts", style: TextStyle(color: Colors.white)),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.go('/eligibilities');
+                      },
                       child: Text("Eligibility",
                           style: TextStyle(color: Colors.white)),
                     ),
@@ -156,14 +160,18 @@ class _CategoryState extends State<Category> {
                             leading: const Icon(Icons.article,
                                 color: Colors.blueGrey),
                             title: const Text("Posts"),
-                            onTap: () {},
+                            onTap: () {
+                              context.go('/posts');
+                            },
                           ),
                           Divider(),
                           ListTile(
                             leading: const Icon(Icons.verified_user,
                                 color: Colors.blueGrey),
                             title: const Text("Eligibility"),
-                            onTap: () {},
+                            onTap: () {
+                              context.go('/eligibilities');
+                            },
                           ),
                           Divider(),
                           ListTile(

@@ -2,12 +2,16 @@ import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'view_models/auth_view_model.dart';
 import 'view_models/exam_view_model.dart';
 import 'views/login_screen.dart';
 import 'app_router.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  String initialRoute = await _getInitialRoute();
+
   runApp(
     MultiProvider(
       providers: [
@@ -15,13 +19,26 @@ void main() {
         ChangeNotifierProvider(create: (_) => ExamViewModel()),
         ChangeNotifierProvider(create: (_) => CategoryViewModel()),
       ],
-      child: const MyApp(),
+      child: MyApp(initialRoute: initialRoute),
     ),
   );
 }
 
+Future<String> _getInitialRoute() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString("auth_token");
+
+  if (token != null && token.isNotEmpty) {
+    return '/'; // Redirect to home if token exists
+  } else {
+    return '/login'; // Show login screen if not authenticated
+  }
+}
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+
+  const MyApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +50,7 @@ class MyApp extends StatelessWidget {
           Theme.of(context).textTheme,
         ),
       ),
-      routerConfig: router, // ✅ Uses GoRouter setup from app_router.dart
+      routerConfig: getAppRouter(initialRoute), // ✅ Pass the dynamic initial route
     );
   }
 }

@@ -86,7 +86,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             };
 
                             // Call ViewModel to add category
-                            await categoryViewModel.addcategory(newcategory);
+                            await categoryViewModel.addCategory(newcategory);
 
                             // Show success message
                             ScaffoldMessenger.of(context).showSnackBar(

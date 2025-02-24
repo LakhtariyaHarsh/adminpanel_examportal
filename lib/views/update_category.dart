@@ -1,5 +1,6 @@
 import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class UpdateCategory extends StatefulWidget {
@@ -31,8 +32,8 @@ class _UpdateCategoryState extends State<UpdateCategory> {
   Future<void> fetchcategoryData() async {
     final categoryViewModel =
         Provider.of<CategoryViewModel>(context, listen: false);
-    await categoryViewModel.fetchcategoryById(widget.id);
-    final category = categoryViewModel.selectedcategory;
+    await categoryViewModel.fetchCategoryById(widget.id);
+    final category = categoryViewModel.selectedCategory;
 
     if (category != null) {
       setState(() {
@@ -116,13 +117,13 @@ class _UpdateCategoryState extends State<UpdateCategory> {
                                     "categoryName": nameController.text,
                                   };
 
-                                  await categoryViewModel.updatecategory(
+                                  await categoryViewModel.updateCategory(
                                       widget.id, updatedCategory);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                           content: Text(
                                               "Category updated successfully!")));
-                                  Navigator.pop(context);
+                                  context.go('/categories');
                                 }
                               },
                               child: Text("Update category"),

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../view_models/auth_view_model.dart';
-import '../services/category_service.dart';
 import 'login_screen.dart';
 
 class Category extends StatefulWidget {
@@ -17,77 +16,35 @@ class Category extends StatefulWidget {
 class _CategoryState extends State<Category> {
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
-
-  List<Map<String, String>> categoryList = [];
-  bool isLoading = false;
-  bool isLoadingMore = false;
-  int page = 1;
-  int limit = 20;
-  int totalPages = 1;
-
   ScrollController _scrollController = ScrollController();
-  final CategoryService _categoryService = CategoryService();
 
   @override
   void initState() {
     super.initState();
+    final categoryViewModel =
+        Provider.of<CategoryViewModel>(context, listen: false);
+    // Fetch initial categories.
+    categoryViewModel.fetchCategories();
     _scrollController.addListener(_scrollListener);
-    fetchCategories();
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  // Scroll Listener for Pagination
+  // Scroll listener that triggers load-more when near bottom.
   void _scrollListener() {
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        !isLoadingMore &&
-        page < totalPages) {
-      page++;
-      fetchCategories(isLoadMore: true);
-    }
-  }
-
-  // Fetch Categories with Pagination
-  Future<void> fetchCategories({bool isLoadMore = false}) async {
-    if (isLoadMore && (isLoadingMore || page > totalPages)) return;
-
-    try {
-      if (isLoadMore) {
-        setState(() => isLoadingMore = true);
-      } else {
-        setState(() => isLoading = true);
+        _scrollController.position.maxScrollExtent - 200) {
+      final categoryViewModel =
+          Provider.of<CategoryViewModel>(context, listen: false);
+      // If not loading and more pages exist, fetch more.
+      if (!categoryViewModel.isLoading && categoryViewModel.page < categoryViewModel.totalPages) {
+        categoryViewModel.fetchCategories(isLoadMore: true);
       }
-
-      Map<String, dynamic> data =
-          await _categoryService.fetchCategory(page, limit);
-
-      setState(() {
-        categoryList.addAll(data["categories"]
-            .where((category) =>
-                category["_id"] != null && category["categoryName"] != null)
-            .map<Map<String, String>>((category) {
-          return {
-            "id": category["_id"].toString(),
-            "name": category["categoryName"].toString(),
-          };
-        }).toList());
-
-        totalPages = data["totalPages"];
-        isLoading = false;
-        isLoadingMore = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-        isLoadingMore = false;
-      });
-      print("Error fetching categories: $e");
     }
   }
 
@@ -95,16 +52,14 @@ class _CategoryState extends State<Category> {
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
+    // If a search query is active, use the search results; otherwise, show the full list.
     final bool isSearching = _searchQuery.isNotEmpty;
-    final displayedCategories = isSearching
+    final List displayedCategories = isSearching
         ? categoryViewModel.searchResults
         : categoryViewModel.categories;
 
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 720;
-    bool isTablet = screenWidth >= 720 && screenWidth < 1024;
-    bool isDesktop = screenWidth >= 1024;
 
     return Scaffold(
       appBar: AppBar(
@@ -116,10 +71,10 @@ class _CategoryState extends State<Category> {
                   children: [
                     TextButton(
                       onPressed: () {
-                       context.go('/');
+                        context.go('/');
                       },
-                      child:
-                          Text("Exams", style: TextStyle(color: Colors.white)),
+                      child: Text("Exams",
+                          style: TextStyle(color: Colors.white)),
                     ),
                     TextButton(
                       onPressed: () {},
@@ -135,10 +90,7 @@ class _CategoryState extends State<Category> {
                       icon: Icon(Icons.logout, color: Colors.white),
                       onPressed: () {
                         authViewModel.logout();
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginScreen()));
+                        context.go('/login');
                       },
                     ),
                   ],
@@ -196,7 +148,6 @@ class _CategoryState extends State<Category> {
                                 color: Colors.blueGrey),
                             title: const Text("Category"),
                             onTap: () {
-                              print("object");
                               context.go('/categories');
                             },
                           ),
@@ -215,6 +166,16 @@ class _CategoryState extends State<Category> {
                             onTap: () {},
                           ),
                           Divider(),
+                          ListTile(
+                            leading: const Icon(Icons.logout,
+                                color: Colors.blueGrey),
+                            title: const Text("Logout"),
+                            onTap: () {
+                              authViewModel.logout();
+                              context.go('/login');
+                            },
+                          ),
+                          Divider(),
                         ],
                       ),
                     ),
@@ -229,28 +190,25 @@ class _CategoryState extends State<Category> {
         },
         child: Icon(Icons.add),
       ),
-      body: isLoading && categoryList.isEmpty
+      body: categoryViewModel.isLoading && categoryViewModel.categories.isEmpty
           ? Center(child: CircularProgressIndicator())
           : Center(
               child: Container(
-                width: isDesktop ? screenWidth * 0.7 : screenWidth * 0.95,
+                width: screenWidth >= 1024
+                    ? screenWidth * 0.7
+                    : screenWidth * 0.95,
                 color: Colors.blueGrey[50],
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     children: [
-                      // 🔹 Search Bar
+                      // Search Bar
                       TextField(
                         controller: _searchController,
                         onChanged: (value) {
                           setState(() {
                             _searchQuery = value;
                           });
-
-                          final categoryViewModel =
-                              Provider.of<CategoryViewModel>(context,
-                                  listen: false);
-
                           if (value.isEmpty) {
                             categoryViewModel.clearSearch();
                           } else {
@@ -266,21 +224,13 @@ class _CategoryState extends State<Category> {
                           fillColor: Colors.white,
                         ),
                       ),
-
                       SizedBox(height: 20),
-
-                      // Category List with Pagination
+                      // Category List
                       Expanded(
                         child: ListView.builder(
                           controller: _scrollController,
-                          itemCount: displayedCategories.length + 1,
+                          itemCount: displayedCategories.length,
                           itemBuilder: (context, index) {
-                            if (index == displayedCategories.length) {
-                              return isLoadingMore
-                                  ? Center(child: CircularProgressIndicator())
-                                  : SizedBox();
-                            }
-
                             final category = displayedCategories[index];
                             return Card(
                               margin: EdgeInsets.symmetric(vertical: 10),
@@ -310,11 +260,15 @@ class _CategoryState extends State<Category> {
                                       IconButton(
                                         icon: Icon(Icons.delete,
                                             color: Colors.red),
-                                        onPressed: () {
-                                          setState(() {
-                                            categoryList.removeWhere((c) =>
-                                                c['id'] == category["id"]);
-                                          });
+                                        onPressed: () async {
+                                          final id = category["id"] ?? "";
+                                          await categoryViewModel.deleteCategory(id);
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    "Category deleted successfully")),
+                                          );
                                         },
                                       ),
                                     ],
@@ -325,6 +279,12 @@ class _CategoryState extends State<Category> {
                           },
                         ),
                       ),
+                      // Optional: A loader at the bottom when loading more data.
+                      if (categoryViewModel.isLoading && categoryViewModel.categories.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
                     ],
                   ),
                 ),

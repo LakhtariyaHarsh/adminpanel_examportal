@@ -353,7 +353,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                             );
 
                             // Close screen
-                            context.go('/exams');
+                            context.go('/');
                           }
                         },
                         child: Text("Add Exam"),

@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     bool success = await authViewModel.login(email, password);
     if (success) {
-      context.push('/'); // ✅ Prevents multiple navigation calls
+      context.go('/'); // ✅ Prevents multiple navigation calls
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(authViewModel.errorMessage ?? "Login Failed")),

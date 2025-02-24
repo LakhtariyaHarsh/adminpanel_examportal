@@ -4,7 +4,7 @@ import '../services/exam_service.dart';
 class ExamViewModel extends ChangeNotifier {
   final ExamService _examService = ExamService();
 
-  List<Map<String, String>> exams = [];
+  List<Map<String, String>> _exams = [];
   List<Map<String, String>> buttonData = [];
   List<Map<String, String>> admitCardExamList = [];
   List<Map<String, String>> resultExamList = [];
@@ -18,9 +18,12 @@ class ExamViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get searchResults => _searchResults;
   String? get errorMessage => _errorMessage;
 
+  bool isLoadingMore = false;
+
+  List<Map<String, String>> get exams => _exams;
   bool isLoading = false;
   int page = 1;
-  int limit = 10;
+  int limit = 5;
   int totalPages = 1;
 
   ExamViewModel() {
@@ -47,21 +50,59 @@ class ExamViewModel extends ChangeNotifier {
   }
 
   /// Fetch all exams with pagination
-  Future<void> fetchExams() async {
-    _setLoading(true);
+  Future<void> fetchExams({bool isLoadMore = false}) async {
+    if (isLoadMore && (isLoadingMore || page > totalPages)) return;
+
     try {
-      var data = await _examService.fetchExams(page, limit);
-      exams = List<Map<String, String>>.from(
-        data["exams"].map((exam) => {
+      if (isLoadMore) {
+        isLoadingMore = true;
+      } else {
+        isLoading = true;
+      }
+      notifyListeners();
+
+      Map<String, dynamic> data = await _examService.fetchExams(page, limit);
+
+      List<Map<String, String>> fetchedExams = data["exams"]
+          .where((exam) => exam["_id"] != null && exam["name"] != null)
+          .map<Map<String, String>>((exam) {
+        String categoryId = "";
+        if (exam["examCategory"] != null) {
+          categoryId = exam["examCategory"] is Map
+              ? exam["examCategory"]["_id"].toString()
+              : exam["examCategory"].toString();
+        }
+        return {
           "id": exam["_id"].toString(),
           "name": exam["name"].toString(),
-        }),
-      );
+          "examcategory": categoryId,
+        };
+      }).toList();
+
+      if (isLoadMore) {
+        _exams.addAll(fetchedExams);
+      } else {
+        _exams = fetchedExams;
+      }
       totalPages = data["totalPages"];
+
+      isLoading = false;
+      isLoadingMore = false;
+      notifyListeners();
     } catch (e) {
-      _errorMessage = "Error fetching exams: $e";
-    } finally {
-      _setLoading(false);
+      isLoading = false;
+      isLoadingMore = false;
+      notifyListeners();
+      print("Error fetching exams: $e");
+    }
+  }
+
+  // Method to update an exam in the local list
+  void updateExamLocally(String examId, Map<String, String> updatedExam) {
+    int index = _exams.indexWhere((exam) => exam["id"] == examId);
+    if (index != -1) {
+      _exams[index] = updatedExam;
+      notifyListeners();
     }
   }
 
@@ -121,13 +162,15 @@ class ExamViewModel extends ChangeNotifier {
   }
 
   /// 🔹 Delete an Exam
-  Future<void> deleteExam(String id) async {
+  Future<bool> deleteExam(String id) async {
     try {
       await _examService.deleteExam(id);
       exams.removeWhere((exam) => exam['id'] == id);
       notifyListeners();
+      return true;
     } catch (e) {
       _errorMessage = "Error deleting exam: $e";
+      return false;
     }
   }
 
@@ -138,9 +181,9 @@ class ExamViewModel extends ChangeNotifier {
       var data = await _examService.getExamsByLastDateToApply(page, 9);
       buttonData = List<Map<String, String>>.from(
         data["exams"].map((exam) => {
-          "id": exam["_id"].toString(),
-          "name": exam["name"].toString(),
-        }),
+              "id": exam["_id"].toString(),
+              "name": exam["name"].toString(),
+            }),
       );
       totalPages = data["totalPages"];
     } catch (e) {
@@ -157,9 +200,9 @@ class ExamViewModel extends ChangeNotifier {
       var data = await _examService.getExamsByAdmitCard(page, limit);
       admitCardExamList = List<Map<String, String>>.from(
         data["exams"].map((exam) => {
-          "id": exam["_id"].toString(),
-          "name": exam["name"].toString(),
-        }),
+              "id": exam["_id"].toString(),
+              "name": exam["name"].toString(),
+            }),
       );
       totalPages = data["totalPages"];
     } catch (e) {
@@ -176,9 +219,9 @@ class ExamViewModel extends ChangeNotifier {
       var data = await _examService.getExamsByResult(page, limit);
       resultExamList = List<Map<String, String>>.from(
         data["exams"].map((exam) => {
-          "id": exam["_id"].toString(),
-          "name": exam["name"].toString(),
-        }),
+              "id": exam["_id"].toString(),
+              "name": exam["name"].toString(),
+            }),
       );
       totalPages = data["totalPages"];
     } catch (e) {
@@ -195,9 +238,9 @@ class ExamViewModel extends ChangeNotifier {
       var data = await _examService.getExamsByAnswerKey(page, limit);
       answerKeyExamList = List<Map<String, String>>.from(
         data["exams"].map((exam) => {
-          "id": exam["_id"].toString(),
-          "name": exam["name"].toString(),
-        }),
+              "id": exam["_id"].toString(),
+              "name": exam["name"].toString(),
+            }),
       );
       totalPages = data["totalPages"];
     } catch (e) {
@@ -214,9 +257,9 @@ class ExamViewModel extends ChangeNotifier {
       var data = await _examService.getExamsBySyllabus(page, limit);
       syllabusExamList = List<Map<String, String>>.from(
         data["exams"].map((exam) => {
-          "id": exam["_id"].toString(),
-          "name": exam["name"].toString(),
-        }),
+              "id": exam["_id"].toString(),
+              "name": exam["name"].toString(),
+            }),
       );
       totalPages = data["totalPages"];
     } catch (e) {

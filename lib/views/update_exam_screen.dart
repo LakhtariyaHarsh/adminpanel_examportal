@@ -79,7 +79,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     final categoryViewModel =
         Provider.of<CategoryViewModel>(context, listen: false);
     final category =
-        await categoryViewModel.fetchcategoryById(widget.categoryid);
+        await categoryViewModel.fetchCategoryById(widget.categoryid);
     // Expecting category to be a map with "categoryName" key.
     if (category != null) {
       setState(() {
@@ -471,7 +471,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                       SnackBar(
                                           content: Text(
                                               "Exam updated successfully!")));
-                                  Navigator.pop(context);
+                                  Navigator.pop(context, true);
                                 }
                               },
                               child: Text("Update Exam"),

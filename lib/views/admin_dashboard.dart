@@ -1,4 +1,3 @@
-import 'package:admin_panel/services/exam_service.dart';
 import 'package:admin_panel/view_models/exam_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +6,6 @@ import '../view_models/auth_view_model.dart';
 import 'add_exam_screen.dart';
 import 'update_exam_screen.dart';
 import 'login_screen.dart';
-import 'category.dart' as category_view;
 
 class AdminDashboard extends StatefulWidget {
   @override
@@ -16,26 +14,15 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   TextEditingController _searchController = TextEditingController();
-  String _searchQuery = "";
-
-  // Local state for exam fetching similar to latestjob.dart
-  List<Map<String, String>> examList = [];
-  bool isLoading = false;
-  bool isLoadingMore = false;
-  int page = 1;
-  int limit = 20; // You can adjust this as needed
-  int totalPages = 1;
-
   final ScrollController _scrollController = ScrollController();
-  final ExamService _apiService =
-      ExamService(); // Make sure you have an ApiService
 
   @override
   void initState() {
     super.initState();
+    final examViewModel = Provider.of<ExamViewModel>(context, listen: false);
+    // Initially load exams
+    examViewModel.fetchExams();
     _scrollController.addListener(_scrollListener);
-    // Fetch the initial data
-    fetchExams();
   }
 
   @override
@@ -45,60 +32,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.dispose();
   }
 
-  // Scroll listener to detect near-bottom scrolling
   void _scrollListener() {
+    final examViewModel = Provider.of<ExamViewModel>(context, listen: false);
+    // When scrolled near the bottom, load more exams if needed.
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 200 &&
-        !isLoadingMore) {
-      if (page < totalPages) {
-        page++; // Increment page
-        fetchExams(isLoadMore: true);
-      }
-    }
-  }
-
-  // Fetch Exams with Pagination (Store ID & Name)
-  Future<void> fetchExams({bool isLoadMore = false}) async {
-    if (isLoadMore && (isLoadingMore || page > totalPages)) return;
-
-    try {
-      if (isLoadMore) {
-        setState(() => isLoadingMore = true);
-      } else {
-        setState(() => isLoading = true);
-      }
-
-      Map<String, dynamic> data = await _apiService.fetchExams(page, limit);
-
-      setState(() {
-        // Append exams as a list of maps (id & name)
-        examList.addAll(data["exams"]
-            .where((exam) => exam["_id"] != null && exam["name"] != null)
-            .map<Map<String, String>>((exam) {
-          // Extract the examCategory _id if available, otherwise use an empty string.
-          String categoryId = "";
-          if (exam["examCategory"] != null) {
-            categoryId = exam["examCategory"] is Map
-                ? exam["examCategory"]["_id"].toString()
-                : exam["examCategory"].toString();
-          }
-          return {
-            "id": exam["_id"].toString(),
-            "name": exam["name"].toString(),
-            "examcategory": categoryId,
-          };
-        }).toList());
-
-        totalPages = data["totalPages"]; // Update total pages
-        isLoading = false;
-        isLoadingMore = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-        isLoadingMore = false;
-      });
-      print("Error fetching exams: $e");
+        !examViewModel.isLoadingMore &&
+        examViewModel.page < examViewModel.totalPages) {
+      examViewModel.page++;
+      examViewModel.fetchExams(isLoadMore: true);
     }
   }
 
@@ -106,12 +48,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
     final examViewModel = Provider.of<ExamViewModel>(context);
-    final isSearching = _searchQuery.isNotEmpty;
-    final displayedExams = isSearching ? examViewModel.searchResults : examList;
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    // If there is an active search (i.e. search controller is not empty)
+    // display search results, otherwise show full exams list.
+    final displayedExams = _searchController.text.isNotEmpty
+        ? examViewModel.searchResults
+        : examViewModel.exams;
+    final double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 720;
-    bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
 
     return Scaffold(
@@ -132,14 +75,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     ),
                     TextButton(
                       onPressed: () {
-                        // Navigate to Posts Screen (Replace with actual screen)
+                        // Navigate to Posts Screen (replace with your screen)
                       },
-                      child:
-                          Text("Posts", style: TextStyle(color: Colors.white)),
+                      child: Text("Posts",
+                          style: TextStyle(color: Colors.white)),
                     ),
                     TextButton(
                       onPressed: () {
-                        // Navigate to Eligibility Screen (Replace with actual screen)
+                        // Navigate to Eligibility Screen (replace with your screen)
                       },
                       child: Text("Eligibility",
                           style: TextStyle(color: Colors.white)),
@@ -148,11 +91,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       icon: Icon(Icons.logout, color: Colors.white),
                       onPressed: () {
                         authViewModel.logout();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => LoginScreen()),
-                        );
+                        context.go('/login');
                       },
                     ),
                   ],
@@ -210,7 +149,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 color: Colors.blueGrey),
                             title: const Text("Category"),
                             onTap: () {
-                              print("object");
                               context.go('/categories');
                             },
                           ),
@@ -229,6 +167,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             onTap: () {},
                           ),
                           Divider(),
+                          ListTile(
+                            leading: const Icon(Icons.logout,
+                                color: Colors.blueGrey),
+                            title: const Text("Logout"),
+                            onTap: () {
+                              authViewModel.logout();
+                              context.go('/login');
+                            },
+                          ),
+                          Divider(),
                         ],
                       ),
                     ),
@@ -243,7 +191,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         },
         child: Icon(Icons.add),
       ),
-      body: isLoading && examList.isEmpty
+      body: examViewModel.isLoading && examViewModel.exams.isEmpty
           ? Center(child: CircularProgressIndicator())
           : Center(
               child: Container(
@@ -257,19 +205,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       TextField(
                         controller: _searchController,
                         onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value;
-                          });
-
-                          final examViewModel = Provider.of<ExamViewModel>(
-                              context,
-                              listen: false);
-
+                          // If search query is empty, clear search results.
                           if (value.isEmpty) {
-                            examViewModel
-                                .clearSearch(); // Clear results when search is empty
+                            examViewModel.clearSearch();
                           } else {
-                            examViewModel.searchExams(value); // Perform search
+                            // Otherwise, perform search.
+                            examViewModel.searchExams(value);
                           }
                         },
                         decoration: InputDecoration(
@@ -281,21 +222,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           fillColor: Colors.white,
                         ),
                       ),
-
                       SizedBox(height: 20),
-                      // Exam List using ListView.builder with loader appended at the bottom
                       Expanded(
                         child: ListView.builder(
                           controller: _scrollController,
                           itemCount: displayedExams.length +
-                              1, // Extra item for loader
+                              1, // Add extra item for a loading indicator if needed.
                           itemBuilder: (context, index) {
                             if (index == displayedExams.length) {
-                              return isLoadingMore
+                              return examViewModel.isLoadingMore
                                   ? Center(child: CircularProgressIndicator())
                                   : SizedBox();
                             }
-
                             final exam = displayedExams[index];
                             return Card(
                               margin: EdgeInsets.symmetric(vertical: 10),
@@ -317,24 +255,55 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       IconButton(
                                         icon: Icon(Icons.edit,
                                             color: Colors.blue),
-                                        onPressed: () {
-                                          print(exam["examcategory"]);
-                                          context.go(
-                                              '/exams/update/${exam["id"]}/${Uri.encodeComponent(exam["name"] ?? "")}/${exam["examcategory"] ?? ""}');
+                                        onPressed: () async {
+                                          final updated = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  UpdateExamScreen(
+                                                id: exam["id"] ?? "",
+                                                examName: exam["name"] ?? "",
+                                                categoryid:
+                                                    exam["examcategory"] ?? "",
+                                              ),
+                                            ),
+                                          );
+                                          if (updated == true) {
+                                            // After updating, refresh the exams list.
+                                            examViewModel.fetchExams();
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      "Exam updated successfully")),
+                                            );
+                                          }
                                         },
                                       ),
                                       IconButton(
                                         icon: Icon(Icons.delete,
                                             color: Colors.red),
-                                        onPressed: () {
-                                          // Delete logic can be implemented here, such as calling a delete API
-                                          // For now, we simply remove the exam locally and rebuild the list.
-                                          setState(() {
-                                            examList.removeWhere(
-                                                (e) => e['id'] == exam["id"]);
-                                          });
+                                        onPressed: () async {
+                                          bool success = await examViewModel
+                                                  .deleteExam(exam["id"] ?? "") ??
+                                              false;
+                                          if (success) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      "Exam deleted successfully")),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      "Failed to delete exam")),
+                                            );
+                                          }
                                         },
-                                      ),
+                                      )
                                     ],
                                   ),
                                 ),

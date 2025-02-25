@@ -16,6 +16,35 @@ class _AddExamScreenState extends State<AddExamScreen> {
 
   // Controllers for text fields
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController shortInformationController =
+      TextEditingController();
+  final TextEditingController organizationNameController =
+      TextEditingController();
+  final TextEditingController fullNameOfExamController =
+      TextEditingController();
+  final TextEditingController advertisementNoController =
+      TextEditingController();
+  final TextEditingController howToPayController = TextEditingController();
+  final TextEditingController ageRelaxationBriefController =
+      TextEditingController();
+  final TextEditingController applyOnlineController = TextEditingController();
+  final TextEditingController downloadShortNoticeController =
+      TextEditingController();
+  final TextEditingController downloadNotificationController =
+      TextEditingController();
+  final TextEditingController officialWebsiteController =
+      TextEditingController();
+  final TextEditingController broucherLinkController = TextEditingController();
+  final TextEditingController resultlinkController = TextEditingController();
+  final TextEditingController howToCheckResultController =
+      TextEditingController();
+  final TextEditingController howToFillFormController = TextEditingController();
+  final TextEditingController howToDownloadAdmitCardController =
+      TextEditingController();
+  final TextEditingController correctionInFormLinkController =
+      TextEditingController();
+
+  // Numeric fields controllers
   final TextEditingController minAgeController = TextEditingController();
   final TextEditingController maxAgeController = TextEditingController();
   final TextEditingController generalCategoryFeeController =
@@ -28,6 +57,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
       TextEditingController();
   final TextEditingController phCategoryFeeController = TextEditingController();
   final TextEditingController PostnameController = TextEditingController();
+  final TextEditingController womenCategoryFeeController = TextEditingController();
 
   // Date fields
   DateTime? applicationBegin;
@@ -39,6 +69,12 @@ class _AddExamScreenState extends State<AddExamScreen> {
   DateTime? resultPostingDate;
   DateTime? examDate;
   DateTime? ageFrom;
+  DateTime? ageUpto;
+  DateTime? admitCardAvailableEdit;
+  DateTime? answerKeyAvailableEdit;
+  DateTime? resultPostModify;
+  DateTime? correctiondateInForm;
+  DateTime? jobPostingDate;
 
   String? selectedCategory;
   String? selectedPost;
@@ -48,6 +84,10 @@ class _AddExamScreenState extends State<AddExamScreen> {
   bool isAnswerKeyAvailable = false;
   bool syllabusAvailable = false;
   bool resultAvailable = false;
+  bool multiPost = false;
+  bool shortNotice = false;
+  bool downloadBroucher = false;
+  bool correctionInForm = false;
 
   // Function to pick a date
   Future<void> _selectDate(BuildContext context, DateTime? initialDate,
@@ -191,9 +231,37 @@ class _AddExamScreenState extends State<AddExamScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Required field: Exam Name
-                      _buildTextFieldWithValidation(nameController, "Exam Name",
-                          isRequired: true),
+                      // Required Field: Exam Name
+                      _buildTextFieldWithValidation(nameController, "Exam Name", isRequired: true),
+
+                      // Optional Text Fields (Short Information, Organization, etc.)
+                      _buildTextFieldWithValidation(shortInformationController, "Short Information"),
+                      _buildTextFieldWithValidation(organizationNameController, "Organization Name"),
+                      _buildTextFieldWithValidation(fullNameOfExamController, "Full Name Of Exam"),
+                      _buildTextFieldWithValidation(advertisementNoController, "Advertisement No"),
+                      _buildTextFieldWithValidation(howToPayController, "How To Pay"),
+                      _buildTextFieldWithValidation(ageRelaxationBriefController, "Age Relaxation Brief"),
+                      _buildTextFieldWithValidation(applyOnlineController, "Apply Online"),
+                      _buildTextFieldWithValidation(downloadShortNoticeController, "Download Short Notice"),
+                      _buildTextFieldWithValidation(downloadNotificationController, "Download Notification"),
+                      _buildTextFieldWithValidation(officialWebsiteController, "Official Website"),
+                      _buildTextFieldWithValidation(broucherLinkController, "Broucher Link"),
+                      _buildTextFieldWithValidation(resultlinkController, "Result Link"),
+                      _buildTextFieldWithValidation(howToCheckResultController, "How To Check Result"),
+                      _buildTextFieldWithValidation(howToFillFormController, "How To Fill Form"),
+                      _buildTextFieldWithValidation(howToDownloadAdmitCardController, "How To Download Admit Card"),
+                      _buildTextFieldWithValidation(correctionInFormLinkController, "Correction In Form Link"),
+
+                      // Numeric Fields (Allowed to be null)
+                      _buildTextFieldWithValidation(minAgeController, "Min Age", isNumber: true),
+                      _buildTextFieldWithValidation(maxAgeController, "Max Age", isNumber: true),
+                      _buildTextFieldWithValidation(generalCategoryFeeController, "General Category Fee", isNumber: true),
+                      _buildTextFieldWithValidation(obcCategoryFeeController, "OBC Category Fee", isNumber: true),
+                      _buildTextFieldWithValidation(ewsCategoryFeeController, "EWS Category Fee", isNumber: true),
+                      _buildTextFieldWithValidation(scstCategoryFeeController, "SC/ST Category Fee", isNumber: true),
+                      _buildTextFieldWithValidation(phCategoryFeeController, "PH Category Fee", isNumber: true),
+                      _buildTextFieldWithValidation(womenCategoryFeeController, "Women Category Fee", isNumber: true),
+
 
                       _styledCard(
                         Column(
@@ -353,77 +421,61 @@ class _AddExamScreenState extends State<AddExamScreen> {
                         ),
                       ),
 
-                      _buildDatePicker(
-                          "Application Begin Date",
-                          applicationBegin,
-                          (date) => setState(() => applicationBegin = date)),
+                     // Date Pickers
+                      _buildDatePicker("Application Begin", applicationBegin, (date) => setState(() => applicationBegin = date)),
+                      _buildDatePicker("Last Date To Apply", lastDateToApply, (date) => setState(() => lastDateToApply = date)),
+                      _buildDatePicker("Last Date To Pay Exam Fee", lastDateToPayExamFee, (date) => setState(() => lastDateToPayExamFee = date)),
+                      _buildDatePicker("Exam Date", examDate, (date) => setState(() => examDate = date)),
+                      _buildDatePicker("Age From", ageFrom, (date) => setState(() => ageFrom = date)),
+                      _buildDatePicker("Age Upto", ageUpto, (date) => setState(() => ageUpto = date)),
 
-                      _buildDatePicker("Last Date to Apply", lastDateToApply,
-                          (date) => setState(() => lastDateToApply = date)),
+                      // Checkbox with Date Pickers for Admit Card, Answer Key, Syllabus & Result
+                      _buildCheckboxWithDate("Admit Card Available", isAdmitCardAvailable, admitCardAvailable, (val) => setState(() => isAdmitCardAvailable = val), (date) => setState(() => admitCardAvailable = date)),
+                      _buildCheckboxWithDate("Answer Key Available", isAnswerKeyAvailable, answerKeyAvailable, (val) => setState(() => isAnswerKeyAvailable = val), (date) => setState(() => answerKeyAvailable = date)),
+                      _buildCheckboxWithDate("Syllabus Available", syllabusAvailable, syllabusAvailableDate, (val) => setState(() => syllabusAvailable = val), (date) => setState(() => syllabusAvailableDate = date)),
+                      _buildCheckboxWithDate("Result Available", resultAvailable, resultPostingDate, (val) => setState(() => resultAvailable = val), (date) => setState(() => resultPostingDate = date)),
 
-                      _buildDatePicker(
-                          "Last Date to Pay Exam Fee",
-                          lastDateToPayExamFee,
-                          (date) =>
-                              setState(() => lastDateToPayExamFee = date)),
+                      // Additional Date Pickers for optional fields
+                      _buildDatePicker("Admit Card Available Edit", admitCardAvailableEdit, (date) => setState(() => admitCardAvailableEdit = date)),
+                      _buildDatePicker("Answer Key Available Edit", answerKeyAvailableEdit, (date) => setState(() => answerKeyAvailableEdit = date)),
+                      _buildDatePicker("Result Post Modify", resultPostModify, (date) => setState(() => resultPostModify = date)),
+                      _buildDatePicker("Correction Date In Form", correctiondateInForm, (date) => setState(() => correctiondateInForm = date)),
+                      _buildDatePicker("Job Posting Date", jobPostingDate, (date) => setState(() => jobPostingDate = date)),
 
-                      _buildCheckboxWithDate(
-                          "Admit Card Available",
-                          isAdmitCardAvailable,
-                          admitCardAvailable,
-                          (value) =>
-                              setState(() => isAdmitCardAvailable = value),
-                          (date) => setState(() => admitCardAvailable = date)),
+                      // Checkbox for multiPost, shortNotice, downloadBroucher, correctionInForm
+                      _styledCard(
+                        CheckboxListTile(
+                          title: Text("Multi Post", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                          value: multiPost,
+                          onChanged: (val) => setState(() => multiPost = val!),
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      ),
+                      _styledCard(
+                        CheckboxListTile(
+                          title: Text("Short Notice", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                          value: shortNotice,
+                          onChanged: (val) => setState(() => shortNotice = val!),
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      ),
+                      _styledCard(
+                        CheckboxListTile(
+                          title: Text("Download Broucher", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                          value: downloadBroucher,
+                          onChanged: (val) => setState(() => downloadBroucher = val!),
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      ),
+                      _styledCard(
+                        CheckboxListTile(
+                          title: Text("Correction In Form", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                          value: correctionInForm,
+                          onChanged: (val) => setState(() => correctionInForm = val!),
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      ),
 
-                      _buildCheckboxWithDate(
-                          "Answer Key Available",
-                          isAnswerKeyAvailable,
-                          answerKeyAvailable,
-                          (value) =>
-                              setState(() => isAnswerKeyAvailable = value),
-                          (date) => setState(() => answerKeyAvailable = date)),
-
-                      _buildCheckboxWithDate(
-                          "Syllabus Available",
-                          syllabusAvailable,
-                          syllabusAvailableDate,
-                          (value) => setState(() => syllabusAvailable = value),
-                          (date) =>
-                              setState(() => syllabusAvailableDate = date)),
-
-                      _buildCheckboxWithDate(
-                          "Result Available",
-                          resultAvailable,
-                          resultPostingDate,
-                          (value) => setState(() => resultAvailable = value),
-                          (date) => setState(() => resultPostingDate = date)),
-
-                      _buildDatePicker("Exam Date", examDate,
-                          (date) => setState(() => examDate = date)),
-
-                      _buildDatePicker("Age From", ageFrom,
-                          (date) => setState(() => ageFrom = date)),
-
-                      // Required Numeric fields (Min/Max Age and Fees)
-                      _buildTextFieldWithValidation(minAgeController, "Min Age",
-                          isNumber: true),
-                      _buildTextFieldWithValidation(maxAgeController, "Max Age",
-                          isNumber: true),
-                      _buildTextFieldWithValidation(
-                          generalCategoryFeeController, "General Category Fee",
-                          isNumber: true),
-                      _buildTextFieldWithValidation(
-                          obcCategoryFeeController, "OBC Category Fee",
-                          isNumber: true),
-                      _buildTextFieldWithValidation(
-                          ewsCategoryFeeController, "EWS Category Fee",
-                          isNumber: true),
-                      _buildTextFieldWithValidation(
-                          scstCategoryFeeController, "SC/ST Category Fee",
-                          isNumber: true),
-                      _buildTextFieldWithValidation(
-                          phCategoryFeeController, "PH Category Fee",
-                          isNumber: true),
                       // Submit Button
                       SizedBox(height: 20),
                       ElevatedButton(
@@ -432,45 +484,58 @@ class _AddExamScreenState extends State<AddExamScreen> {
                             Map<String, dynamic> newExam = {
                               "name": nameController.text,
                               "examCategory": selectedCategory,
-                              "eligibilityCriteria": selectedeligibilityDetails,
-                              "postDetails": selectedPost,
+                              "postDate": DateTime.now().toIso8601String(), // Example auto-generated field
+                              "shortInformation": shortInformationController.text,
+                              "organizationName": organizationNameController.text,
+                              "fullNameOfExam": fullNameOfExamController.text,
+                              "advertisementNo": advertisementNoController.text,
+                              "applicationBegin": applicationBegin?.toIso8601String(),
+                              "lastDateToApply": lastDateToApply?.toIso8601String(),
+                              "lastDateToPayExamFee": lastDateToPayExamFee?.toIso8601String(),
+                              "examDate": examDate?.toIso8601String(),
+                              "isadmitCardAvailable": isAdmitCardAvailable,
+                              "admitCardAvailable": admitCardAvailable?.toIso8601String(),
+                              "admitCardAvailableEdit": admitCardAvailableEdit?.toIso8601String(),
+                              "isanswerKeyAvailable": isAnswerKeyAvailable,
+                              "answerKeyAvailable": answerKeyAvailable?.toIso8601String(),
+                              "answerKeyAvailableEdit": answerKeyAvailableEdit?.toIso8601String(),
+                              "generalCategoryFee": parseNullableInt(generalCategoryFeeController.text),
+                              "obcCategoryFee": parseNullableInt(obcCategoryFeeController.text),
+                              "ewsCategoryFee": parseNullableInt(ewsCategoryFeeController.text),
+                              "scstCategoryFee": parseNullableInt(scstCategoryFeeController.text),
+                              "phCategoryFee": parseNullableInt(phCategoryFeeController.text),
+                              "womenCategoryFee": parseNullableInt(womenCategoryFeeController.text),
+                              "howToPay": howToPayController.text,
                               "minAge": parseNullableInt(minAgeController.text),
                               "maxAge": parseNullableInt(maxAgeController.text),
-                              "generalCategoryFee": parseNullableInt(
-                                  generalCategoryFeeController.text),
-                              "obcCategoryFee": parseNullableInt(
-                                  obcCategoryFeeController.text),
-                              "ewsCategoryFee": parseNullableInt(
-                                  ewsCategoryFeeController.text),
-                              "scstCategoryFee": parseNullableInt(
-                                  scstCategoryFeeController.text),
-                              "phCategoryFee": parseNullableInt(
-                                  phCategoryFeeController.text),
-
-                              // Store Dates (Convert to ISO format)
-                              "applicationBegin":
-                                  applicationBegin?.toIso8601String(),
-                              "lastDateToApply":
-                                  lastDateToApply?.toIso8601String(),
-                              "lastDateToPayExamFee":
-                                  lastDateToPayExamFee?.toIso8601String(),
-                              "admitCardAvailable":
-                                  admitCardAvailable?.toIso8601String(),
-                              "answerKeyAvailable":
-                                  answerKeyAvailable?.toIso8601String(),
-                              "syllabusAvailableDate":
-                                  syllabusAvailableDate?.toIso8601String(),
-                              "resultPostingDate":
-                                  resultPostingDate?.toIso8601String(),
-                              "examDate": examDate?.toIso8601String(),
+                              "ageRelaxationBrief": ageRelaxationBriefController.text,
                               "ageFrom": ageFrom?.toIso8601String(),
-
-                              // Store Boolean Values
-                              "isAdmitCardAvailable": isAdmitCardAvailable,
-                              "isAnswerKeyAvailable": isAnswerKeyAvailable,
+                              "ageUpto": ageUpto?.toIso8601String(),
+                              "multiPost": multiPost,
+                              "postDetails": selectedPost,
+                              "applyOnline": applyOnlineController.text,
+                              "shortNotice": shortNotice,
+                              "downloadShortNotice": downloadShortNoticeController.text,
+                              "downloadNotification": downloadNotificationController.text,
+                              "officialWebsite": officialWebsiteController.text,
+                              "eligibilityCriteria": selectedeligibilityDetails,
+                              "downloadBroucher": downloadBroucher,
+                              "broucherLink": broucherLinkController.text,
                               "syllabusAvailable": syllabusAvailable,
+                              "syllabusAvailableDate": syllabusAvailableDate?.toIso8601String(),
                               "resultAvailable": resultAvailable,
+                              "resultPostingDate": resultPostingDate?.toIso8601String(),
+                              "resultPostModify": resultPostModify?.toIso8601String(),
+                              "resultlink": resultlinkController.text,
+                              "howToCheckResult": howToCheckResultController.text,
+                              "howToFillForm": howToFillFormController.text,
+                              "howToDownloadAdmitCard": howToDownloadAdmitCardController.text,
+                              "correctionInForm": correctionInForm,
+                              "correctionInFormLink": correctionInFormLinkController.text,
+                              "correctiondateInForm": correctiondateInForm?.toIso8601String(),
+                              "jobPostingDate": jobPostingDate?.toIso8601String(),
                             };
+
 
                             // Call ViewModel to add exam
                             await examViewModel.addExam(newExam);

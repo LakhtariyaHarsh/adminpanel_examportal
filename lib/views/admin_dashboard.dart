@@ -268,7 +268,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                 id: exam["id"] ?? "",
                                                 examName: exam["name"] ?? "",
                                                 categoryid:
-                                                    exam["examcategory"] ?? "",
+                                                    exam["examcategory"] ?? "", postid: exam["postDetails"] ?? "",eligibilityid: exam["eligibilityCriteria"] ?? "",
                                               ),
                                             ),
                                           );

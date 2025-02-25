@@ -1,4 +1,6 @@
 import 'package:admin_panel/view_models/Category_view_model.dart';
+import 'package:admin_panel/view_models/Eligibility_view_model.dart';
+import 'package:admin_panel/view_models/post_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/exam_view_model.dart';
@@ -7,9 +9,15 @@ class UpdateExamScreen extends StatefulWidget {
   final String examName;
   final String id;
   final String categoryid;
+  final String postid;
+  final String eligibilityid;
 
   UpdateExamScreen(
-      {required this.examName, required this.id, required this.categoryid});
+      {required this.examName,
+      required this.id,
+      required this.categoryid,
+      required this.postid,
+      required this.eligibilityid});
 
   @override
   _UpdateExamScreenState createState() => _UpdateExamScreenState();
@@ -20,32 +28,31 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
 
   // Controllers for text fields
   late TextEditingController nameController;
-  final TextEditingController shortInformationController =
+  late TextEditingController shortInformationController =
       TextEditingController();
-  final TextEditingController organizationNameController =
+  late TextEditingController organizationNameController =
       TextEditingController();
-  final TextEditingController fullNameOfExamController =
+  late TextEditingController fullNameOfExamController = TextEditingController();
+  late TextEditingController advertisementNoController =
       TextEditingController();
-  final TextEditingController advertisementNoController =
+  late TextEditingController howToPayController = TextEditingController();
+  late TextEditingController ageRelaxationBriefController =
       TextEditingController();
-  final TextEditingController howToPayController = TextEditingController();
-  final TextEditingController ageRelaxationBriefController =
+  late TextEditingController applyOnlineController = TextEditingController();
+  late TextEditingController downloadShortNoticeController =
       TextEditingController();
-  final TextEditingController applyOnlineController = TextEditingController();
-  final TextEditingController downloadShortNoticeController =
+  late TextEditingController downloadNotificationController =
       TextEditingController();
-  final TextEditingController downloadNotificationController =
+  late TextEditingController officialWebsiteController =
       TextEditingController();
-  final TextEditingController officialWebsiteController =
+  late TextEditingController broucherLinkController = TextEditingController();
+  late TextEditingController resultlinkController = TextEditingController();
+  late TextEditingController howToCheckResultController =
       TextEditingController();
-  final TextEditingController broucherLinkController = TextEditingController();
-  final TextEditingController resultlinkController = TextEditingController();
-  final TextEditingController howToCheckResultController =
+  late TextEditingController howToFillFormController = TextEditingController();
+  late TextEditingController howToDownloadAdmitCardController =
       TextEditingController();
-  final TextEditingController howToFillFormController = TextEditingController();
-  final TextEditingController howToDownloadAdmitCardController =
-      TextEditingController();
-  final TextEditingController correctionInFormLinkController =
+  late TextEditingController correctionInFormLinkController =
       TextEditingController();
 
   // Numeric fields controllers
@@ -56,8 +63,9 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   late TextEditingController ewsCategoryFeeController;
   late TextEditingController scstCategoryFeeController;
   late TextEditingController phCategoryFeeController;
-  final TextEditingController PostnameController = TextEditingController();
-  final TextEditingController womenCategoryFeeController = TextEditingController();
+  late TextEditingController PostnameController = TextEditingController();
+  late TextEditingController womenCategoryFeeController =
+      TextEditingController();
 
   // Date fields
   DateTime? applicationBegin;
@@ -81,6 +89,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   String? selectedPost;
   String? selectedeligibilityDetails;
   String? selectedCategoryName;
+  String? selectedPostName;
+  String? selectedEligibilityDetailsName;
 
   bool isadmitCardAvailable = false;
   bool isanswerKeyAvailable = false;
@@ -105,6 +115,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
         isLoading = true;
       });
       await fetchCategoryData();
+      await fetchPostData();
+      await fetchEligibilityData();
       await fetchExamData();
       setState(() {
         isLoading = false;
@@ -134,6 +146,39 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     }
   }
 
+  // Fetch post data by widget.postid and store its name.
+  Future<void> fetchPostData() async {
+    final postViewModel = Provider.of<PostViewModel>(context, listen: false);
+    final post = await postViewModel.fetchPostById(widget.postid);
+    // Expecting category to be a map with "categoryName" key.
+    if (post != null) {
+      setState(() {
+        selectedPostName = post["postName"]?.toString() ?? '';
+      });
+      print("Selected post: $selectedPostName");
+    } else {
+      print("No category found for id: ${widget.postid}");
+    }
+  }
+
+  // Fetch category data by widget.categoryid and store its name.
+  Future<void> fetchEligibilityData() async {
+    final eligibilityViewModel =
+        Provider.of<EligibilityViewModel>(context, listen: false);
+    final eligibility =
+        await eligibilityViewModel.fetchEligibilityById(widget.eligibilityid);
+    // Expecting category to be a map with "categoryName" key.
+    if (eligibility != null) {
+      setState(() {
+        selectedEligibilityDetailsName =
+            eligibility["eligiblityCriteria"]?.toString() ?? '';
+      });
+      print("Selected eligibility: $selectedEligibilityDetailsName");
+    } else {
+      print("No eligibility found for id: ${widget.eligibilityid}");
+    }
+  }
+
   // Fetch exam details by name and store selected category name from exam data if available.
   Future<void> fetchExamData() async {
     final examViewModel = Provider.of<ExamViewModel>(context, listen: false);
@@ -153,6 +198,63 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
             selectedCategoryName = exam["categoryName"].toString();
           }
         }
+
+        if (exam["postDetails"] != null) {
+          selectedPost = exam["postDetails"] is Map
+              ? exam["postDetails"]["_id"].toString()
+              : exam["postDetails"].toString();
+          // Optionally, if exam data contains category name (for instance, exam["categoryName"]), use that:
+          if (exam["postName"] != null) {
+            selectedPostName = exam["postName"].toString();
+          }
+        }
+
+        if (exam["eligibilityCriteria"] != null) {
+          selectedeligibilityDetails = exam["eligibilityCriteria"] is Map
+              ? exam["eligibilityCriteria"]["_id"].toString()
+              : exam["eligibilityCriteria"].toString();
+          // Optionally, if exam data contains category name (for instance, exam["categoryName"]), use that:
+          if (exam["eligiblityCriteria"] != null) {
+            selectedEligibilityDetailsName =
+                exam["eligiblityCriteria"].toString();
+          }
+        }
+
+        shortInformationController = TextEditingController(
+            text: exam["shortInformation"]?.toString() ?? '');
+        organizationNameController = TextEditingController(
+            text: exam["organizationName"]?.toString() ?? '');
+        fullNameOfExamController = TextEditingController(
+            text: exam["fullNameOfExam"]?.toString() ?? '');
+        advertisementNoController = TextEditingController(
+            text: exam["advertisementNo"]?.toString() ?? '');
+        howToPayController =
+            TextEditingController(text: exam["howToPay"]?.toString() ?? '');
+        ageRelaxationBriefController = TextEditingController(
+            text: exam["ageRelaxationBrief"]?.toString() ?? '');
+        applyOnlineController =
+            TextEditingController(text: exam["applyOnline"]?.toString() ?? '');
+        downloadShortNoticeController = TextEditingController(
+            text: exam["downloadShortNotice"]?.toString() ?? '');
+        downloadNotificationController = TextEditingController(
+            text: exam["downloadNotification"]?.toString() ?? '');
+        officialWebsiteController = TextEditingController(
+            text: exam["officialWebsite"]?.toString() ?? '');
+        broucherLinkController =
+            TextEditingController(text: exam["broucherLink"]?.toString() ?? '');
+        resultlinkController =
+            TextEditingController(text: exam["resultlink"]?.toString() ?? '');
+        howToCheckResultController = TextEditingController(
+            text: exam["howToCheckResult"]?.toString() ?? '');
+        howToFillFormController = TextEditingController(
+            text: exam["howToFillForm"]?.toString() ?? '');
+        howToDownloadAdmitCardController = TextEditingController(
+            text: exam["howToDownloadAdmitCard"]?.toString() ?? '');
+        correctionInFormLinkController = TextEditingController(
+            text: exam["correctionInFormLink"]?.toString() ?? '');
+        PostnameController =
+            TextEditingController(text: exam["Postname"]?.toString() ?? '');
+
         minAgeController =
             TextEditingController(text: exam["minAge"]?.toString() ?? '');
         maxAgeController =
@@ -193,11 +295,34 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
             exam["examDate"] != null ? DateTime.parse(exam["examDate"]) : null;
         ageFrom =
             exam["ageFrom"] != null ? DateTime.parse(exam["ageFrom"]) : null;
+        ageUpto =
+            exam["ageUpto"] != null ? DateTime.parse(exam["ageUpto"]) : null;
+        admitCardAvailableEdit = exam["admitCardAvailableEdit"] != null
+            ? DateTime.parse(exam["admitCardAvailableEdit"])
+            : null;
+        answerKeyAvailableEdit = exam["answerKeyAvailableEdit"] != null
+            ? DateTime.parse(exam["answerKeyAvailableEdit"])
+            : null;
+        resultPostModify = exam["resultPostModify"] != null
+            ? DateTime.parse(exam["resultPostModify"])
+            : null;
+        correctiondateInForm = exam["correctiondateInForm"] != null &&
+                exam["correctiondateInForm"] != ""
+            ? DateTime.parse(exam["correctiondateInForm"])
+            : null;
+        jobPostingDate =
+            exam["jobPostingDate"] != null && exam["jobPostingDate"] != ""
+                ? DateTime.parse(exam["jobPostingDate"])
+                : null;
 
         isadmitCardAvailable = exam["isadmitCardAvailable"] ?? false;
         isanswerKeyAvailable = exam["isanswerKeyAvailable"] ?? false;
         syllabusAvailable = exam["syllabusAvailable"] ?? false;
         resultAvailable = exam["resultAvailable"] ?? false;
+        multiPost = exam["multiPost"] ?? false;
+        shortNotice = exam["shortNotice"] ?? false;
+        downloadBroucher = exam["downloadBroucher"] ?? false;
+        correctionInForm = exam["correctionInForm"] ?? false;
       });
     } else {
       print("No exam data found for ${widget.examName}");
@@ -300,6 +425,35 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     );
   }
 
+  // Helper: Styled TextField with optional validation
+  Widget _buildTextFieldWithValidation(
+    TextEditingController controller,
+    String label, {
+    bool isNumber = false,
+    bool isRequired = false,
+  }) {
+    return _styledCard(
+      TextFormField(
+        controller: controller,
+        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        validator: isRequired
+            ? (value) =>
+                (value == null || value.isEmpty) ? "Enter $label" : null
+            : null,
+      ),
+    );
+  }
+
+  int? parseNullableInt(String text) {
+    return text.trim().isEmpty ? null : int.tryParse(text);
+  }
+
   @override
   Widget build(BuildContext context) {
     final examViewModel = Provider.of<ExamViewModel>(context);
@@ -309,9 +463,12 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
+    final postViewModel = Provider.of<PostViewModel>(context);
+    final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(backgroundColor: const Color.fromARGB(255, 146, 156, 160),
+      appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 146, 156, 160),
           title: Text("Update Exam", style: TextStyle(color: Colors.white))),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -325,12 +482,90 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Container(
-                      width: isDesktop ? screenWidth * 0.4 : isTablet ? screenWidth * 0.7 : screenWidth * 0.95,
+                      width: isDesktop
+                          ? screenWidth * 0.4
+                          : isTablet
+                              ? screenWidth * 0.7
+                              : screenWidth * 0.95,
                       child: Form(
                         key: _formKey,
                         child: Column(
                           children: [
-                            _buildTextField(nameController, "Exam Name"),
+                            // Required Field: Exam Name
+                            _buildTextFieldWithValidation(
+                                nameController, "Exam Name",
+                                isRequired: true),
+
+                            // Optional Text Fields (Short Information, Organization, etc.)
+                            _buildTextFieldWithValidation(
+                                shortInformationController,
+                                "Short Information"),
+                            _buildTextFieldWithValidation(
+                                organizationNameController,
+                                "Organization Name"),
+                            _buildTextFieldWithValidation(
+                                fullNameOfExamController, "Full Name Of Exam"),
+                            _buildTextFieldWithValidation(
+                                advertisementNoController, "Advertisement No"),
+                            _buildTextFieldWithValidation(
+                                howToPayController, "How To Pay"),
+                            _buildTextFieldWithValidation(
+                                ageRelaxationBriefController,
+                                "Age Relaxation Brief"),
+                            _buildTextFieldWithValidation(
+                                applyOnlineController, "Apply Online"),
+                            _buildTextFieldWithValidation(
+                                downloadShortNoticeController,
+                                "Download Short Notice"),
+                            _buildTextFieldWithValidation(
+                                downloadNotificationController,
+                                "Download Notification"),
+                            _buildTextFieldWithValidation(
+                                officialWebsiteController, "Official Website"),
+                            _buildTextFieldWithValidation(
+                                broucherLinkController, "Broucher Link"),
+                            _buildTextFieldWithValidation(
+                                resultlinkController, "Result Link"),
+                            _buildTextFieldWithValidation(
+                                howToCheckResultController,
+                                "How To Check Result"),
+                            _buildTextFieldWithValidation(
+                                howToFillFormController, "How To Fill Form"),
+                            _buildTextFieldWithValidation(
+                                howToDownloadAdmitCardController,
+                                "How To Download Admit Card"),
+                            _buildTextFieldWithValidation(
+                                correctionInFormLinkController,
+                                "Correction In Form Link"),
+
+                            // Numeric Fields (Allowed to be null)
+                            _buildTextFieldWithValidation(
+                                minAgeController, "Min Age",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                maxAgeController, "Max Age",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                generalCategoryFeeController,
+                                "General Category Fee",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                obcCategoryFeeController, "OBC Category Fee",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                ewsCategoryFeeController, "EWS Category Fee",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                scstCategoryFeeController, "SC/ST Category Fee",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                phCategoryFeeController, "PH Category Fee",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                womenCategoryFeeController,
+                                "Women Category Fee",
+                                isNumber: true),
+
                             _styledCard(
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,79 +622,259 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                 ],
                               ),
                             ),
-                            SizedBox(
-                              height: 20,
+
+                            _styledCard(
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: DropdownButtonFormField<String>(
+                                        isExpanded: true,
+                                        decoration: InputDecoration(
+                                          hintText: "Select PostName",
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            borderSide: BorderSide(
+                                              color: Colors.blue,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                        ),
+                                        value: selectedPost,
+                                        items: postViewModel.posts
+                                            .map((post) => DropdownMenuItem(
+                                                  value: post["id"] as String,
+                                                  child: Text(
+                                                    post["name"] as String,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 3,
+                                                  ),
+                                                ))
+                                            .toList(),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedPost = value;
+                                          });
+                                          print("Selected post: $selectedPost");
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+
+                            _styledCard(
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: DropdownButtonFormField<String>(
+                                        isExpanded: true,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              "Select Eligibility Details",
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            borderSide: BorderSide(
+                                              color: Colors.blue,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                        ),
+                                        value: selectedeligibilityDetails,
+                                        items: eligibilityViewModel
+                                            .eligibilities
+                                            .map((eligibility) =>
+                                                DropdownMenuItem(
+                                                  value: eligibility["id"]
+                                                      as String,
+                                                  child: Text(
+                                                    eligibility["name"]
+                                                        as String,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 3,
+                                                  ),
+                                                ))
+                                            .toList(),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedeligibilityDetails = value;
+                                          });
+                                          print(
+                                              "Selected Category: $selectedeligibilityDetails");
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Date Pickers
                             _buildDatePicker(
-                                "Application Begin Date",
+                                "Application Begin",
                                 applicationBegin,
                                 (date) =>
                                     setState(() => applicationBegin = date)),
                             _buildDatePicker(
-                                "Last Date to Apply",
+                                "Last Date To Apply",
                                 lastDateToApply,
                                 (date) =>
                                     setState(() => lastDateToApply = date)),
                             _buildDatePicker(
-                                "Last Date to Pay Exam Fee",
+                                "Last Date To Pay Exam Fee",
                                 lastDateToPayExamFee,
                                 (date) => setState(
                                     () => lastDateToPayExamFee = date)),
+                            _buildDatePicker("Exam Date", examDate,
+                                (date) => setState(() => examDate = date)),
+                            _buildDatePicker("Age From", ageFrom,
+                                (date) => setState(() => ageFrom = date)),
+                            _buildDatePicker("Age Upto", ageUpto,
+                                (date) => setState(() => ageUpto = date)),
+
+                            // Checkbox with Date Pickers for Admit Card, Answer Key, Syllabus & Result
                             _buildCheckboxWithDate(
                                 "Admit Card Available",
                                 isadmitCardAvailable,
                                 admitCardAvailable,
-                                (value) => setState(
-                                    () => isadmitCardAvailable = value),
+                                (val) =>
+                                    setState(() => isadmitCardAvailable = val),
                                 (date) =>
                                     setState(() => admitCardAvailable = date)),
                             _buildCheckboxWithDate(
                                 "Answer Key Available",
                                 isanswerKeyAvailable,
                                 answerKeyAvailable,
-                                (value) => setState(
-                                    () => isanswerKeyAvailable = value),
+                                (val) =>
+                                    setState(() => isanswerKeyAvailable = val),
                                 (date) =>
                                     setState(() => answerKeyAvailable = date)),
                             _buildCheckboxWithDate(
                                 "Syllabus Available",
                                 syllabusAvailable,
                                 syllabusAvailableDate,
-                                (value) =>
-                                    setState(() => syllabusAvailable = value),
+                                (val) =>
+                                    setState(() => syllabusAvailable = val),
                                 (date) => setState(
                                     () => syllabusAvailableDate = date)),
                             _buildCheckboxWithDate(
                                 "Result Available",
                                 resultAvailable,
                                 resultPostingDate,
-                                (value) =>
-                                    setState(() => resultAvailable = value),
+                                (val) => setState(() => resultAvailable = val),
                                 (date) =>
                                     setState(() => resultPostingDate = date)),
-                            _buildDatePicker("Exam Date", examDate,
-                                (date) => setState(() => examDate = date)),
-                            _buildDatePicker("Age From", ageFrom,
-                                (date) => setState(() => ageFrom = date)),
-                            _buildTextField(minAgeController, "Min Age",
-                                isNumber: true),
-                            _buildTextField(maxAgeController, "Max Age",
-                                isNumber: true),
-                            _buildTextField(generalCategoryFeeController,
-                                "General Category Fee",
-                                isNumber: true),
-                            _buildTextField(
-                                obcCategoryFeeController, "OBC Category Fee",
-                                isNumber: true),
-                            _buildTextField(
-                                ewsCategoryFeeController, "EWS Category Fee",
-                                isNumber: true),
-                            _buildTextField(
-                                scstCategoryFeeController, "SC/ST Category Fee",
-                                isNumber: true),
-                            _buildTextField(
-                                phCategoryFeeController, "PH Category Fee",
-                                isNumber: true),
+
+                            // Additional Date Pickers for optional fields
+                            _buildDatePicker(
+                                "Admit Card Available Edit",
+                                admitCardAvailableEdit,
+                                (date) => setState(
+                                    () => admitCardAvailableEdit = date)),
+                            _buildDatePicker(
+                                "Answer Key Available Edit",
+                                answerKeyAvailableEdit,
+                                (date) => setState(
+                                    () => answerKeyAvailableEdit = date)),
+                            _buildDatePicker(
+                                "Result Post Modify",
+                                resultPostModify,
+                                (date) =>
+                                    setState(() => resultPostModify = date)),
+                            _buildDatePicker(
+                                "Correction Date In Form",
+                                correctiondateInForm,
+                                (date) => setState(
+                                    () => correctiondateInForm = date)),
+                            _buildDatePicker(
+                                "Job Posting Date",
+                                jobPostingDate,
+                                (date) =>
+                                    setState(() => jobPostingDate = date)),
+
+                            // Checkbox for multiPost, shortNotice, downloadBroucher, correctionInForm
+                            _styledCard(
+                              CheckboxListTile(
+                                title: Text("Multi Post",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500)),
+                                value: multiPost,
+                                onChanged: (val) =>
+                                    setState(() => multiPost = val!),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                              ),
+                            ),
+                            _styledCard(
+                              CheckboxListTile(
+                                title: Text("Short Notice",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500)),
+                                value: shortNotice,
+                                onChanged: (val) =>
+                                    setState(() => shortNotice = val!),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                              ),
+                            ),
+                            _styledCard(
+                              CheckboxListTile(
+                                title: Text("Download Broucher",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500)),
+                                value: downloadBroucher,
+                                onChanged: (val) =>
+                                    setState(() => downloadBroucher = val!),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                              ),
+                            ),
+                            _styledCard(
+                              CheckboxListTile(
+                                title: Text("Correction In Form",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500)),
+                                value: correctionInForm,
+                                onChanged: (val) =>
+                                    setState(() => correctionInForm = val!),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                              ),
+                            ),
                             SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: () async {
@@ -467,45 +882,95 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                   Map<String, dynamic> updatedExam = {
                                     "name": nameController.text,
                                     "examCategory": selectedCategory,
-                                    "minAge": int.parse(minAgeController.text),
-                                    "maxAge": int.parse(maxAgeController.text),
-                                    "generalCategoryFee": int.parse(
-                                        generalCategoryFeeController.text),
-                                    "obcCategoryFee": int.parse(
-                                        obcCategoryFeeController.text),
-                                    "ewsCategoryFee": int.parse(
-                                        ewsCategoryFeeController.text),
-                                    "scstCategoryFee": int.parse(
-                                        scstCategoryFeeController.text),
-                                    "phCategoryFee":
-                                        int.parse(phCategoryFeeController.text),
-
-                                    // Store Dates (Convert to ISO format)
+                                    "postDate": DateTime.now()
+                                        .toIso8601String(), // Example auto-generated field
+                                    "shortInformation":
+                                        shortInformationController.text,
+                                    "organizationName":
+                                        organizationNameController.text,
+                                    "fullNameOfExam":
+                                        fullNameOfExamController.text,
+                                    "advertisementNo":
+                                        advertisementNoController.text,
                                     "applicationBegin":
                                         applicationBegin?.toIso8601String(),
                                     "lastDateToApply":
                                         lastDateToApply?.toIso8601String(),
                                     "lastDateToPayExamFee":
                                         lastDateToPayExamFee?.toIso8601String(),
+                                    "examDate": examDate?.toIso8601String(),
+                                    "isadmitCardAvailable":
+                                        isadmitCardAvailable,
                                     "admitCardAvailable":
                                         admitCardAvailable?.toIso8601String(),
+                                    "admitCardAvailableEdit":
+                                        admitCardAvailableEdit
+                                            ?.toIso8601String(),
+                                    "isanswerKeyAvailable":
+                                        isanswerKeyAvailable,
                                     "answerKeyAvailable":
                                         answerKeyAvailable?.toIso8601String(),
+                                    "answerKeyAvailableEdit":
+                                        answerKeyAvailableEdit
+                                            ?.toIso8601String(),
+                                    "generalCategoryFee": parseNullableInt(
+                                        generalCategoryFeeController.text),
+                                    "obcCategoryFee": parseNullableInt(
+                                        obcCategoryFeeController.text),
+                                    "ewsCategoryFee": parseNullableInt(
+                                        ewsCategoryFeeController.text),
+                                    "scstCategoryFee": parseNullableInt(
+                                        scstCategoryFeeController.text),
+                                    "phCategoryFee": parseNullableInt(
+                                        phCategoryFeeController.text),
+                                    "womenCategoryFee": parseNullableInt(
+                                        womenCategoryFeeController.text),
+                                    "howToPay": howToPayController.text,
+                                    "minAge":
+                                        parseNullableInt(minAgeController.text),
+                                    "maxAge":
+                                        parseNullableInt(maxAgeController.text),
+                                    "ageRelaxationBrief":
+                                        ageRelaxationBriefController.text,
+                                    "ageFrom": ageFrom?.toIso8601String(),
+                                    "ageUpto": ageUpto?.toIso8601String(),
+                                    "multiPost": multiPost,
+                                    "postDetails": selectedPost,
+                                    "applyOnline": applyOnlineController.text,
+                                    "shortNotice": shortNotice,
+                                    "downloadShortNotice":
+                                        downloadShortNoticeController.text,
+                                    "downloadNotification":
+                                        downloadNotificationController.text,
+                                    "officialWebsite":
+                                        officialWebsiteController.text,
+                                    "eligibilityCriteria":
+                                        selectedeligibilityDetails,
+                                    "downloadBroucher": downloadBroucher,
+                                    "broucherLink": broucherLinkController.text,
+                                    "syllabusAvailable": syllabusAvailable,
                                     "syllabusAvailableDate":
                                         syllabusAvailableDate
                                             ?.toIso8601String(),
+                                    "resultAvailable": resultAvailable,
                                     "resultPostingDate":
                                         resultPostingDate?.toIso8601String(),
-                                    "examDate": examDate?.toIso8601String(),
-                                    "ageFrom": ageFrom?.toIso8601String(),
-
-                                    // Store Boolean Values
-                                    "isadmitCardAvailable":
-                                        isadmitCardAvailable,
-                                    "isanswerKeyAvailable":
-                                        isanswerKeyAvailable,
-                                    "syllabusAvailable": syllabusAvailable,
-                                    "resultAvailable": resultAvailable,
+                                    "resultPostModify":
+                                        resultPostModify?.toIso8601String(),
+                                    "resultlink": resultlinkController.text,
+                                    "howToCheckResult":
+                                        howToCheckResultController.text,
+                                    "howToFillForm":
+                                        howToFillFormController.text,
+                                    "howToDownloadAdmitCard":
+                                        howToDownloadAdmitCardController.text,
+                                    "correctionInForm": correctionInForm,
+                                    "correctionInFormLink":
+                                        correctionInFormLinkController.text,
+                                    "correctiondateInForm":
+                                        correctiondateInForm?.toIso8601String(),
+                                    "jobPostingDate":
+                                        jobPostingDate?.toIso8601String(),
                                   };
 
                                   await examViewModel.updateExam(

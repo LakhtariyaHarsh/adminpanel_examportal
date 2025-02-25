@@ -54,7 +54,9 @@ GoRouter getAppRouter(String initialRoute) {
           final examId = state.pathParameters['examId']!;
           final examName = Uri.decodeComponent(state.pathParameters['examName']!);
           final categoryId = state.pathParameters['categoryId']!;
-          return UpdateExamScreen(id: examId, examName: examName, categoryid: categoryId);
+          final postid = state.pathParameters['postid']!;
+          final eligibilityid = state.pathParameters['eligibilityid']!;
+          return UpdateExamScreen(id: examId, examName: examName, categoryid: categoryId, postid: postid, eligibilityid: eligibilityid);
         },
       ),
       GoRoute(

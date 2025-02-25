@@ -1,4 +1,4 @@
-import 'package:admin_panel/view_models/Post_view_model.dart';
+import 'package:admin_panel/view_models/post_view_model.dart';
 import 'package:admin_panel/view_models/Eligibility_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

@@ -20,6 +20,35 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
 
   // Controllers for text fields
   late TextEditingController nameController;
+  final TextEditingController shortInformationController =
+      TextEditingController();
+  final TextEditingController organizationNameController =
+      TextEditingController();
+  final TextEditingController fullNameOfExamController =
+      TextEditingController();
+  final TextEditingController advertisementNoController =
+      TextEditingController();
+  final TextEditingController howToPayController = TextEditingController();
+  final TextEditingController ageRelaxationBriefController =
+      TextEditingController();
+  final TextEditingController applyOnlineController = TextEditingController();
+  final TextEditingController downloadShortNoticeController =
+      TextEditingController();
+  final TextEditingController downloadNotificationController =
+      TextEditingController();
+  final TextEditingController officialWebsiteController =
+      TextEditingController();
+  final TextEditingController broucherLinkController = TextEditingController();
+  final TextEditingController resultlinkController = TextEditingController();
+  final TextEditingController howToCheckResultController =
+      TextEditingController();
+  final TextEditingController howToFillFormController = TextEditingController();
+  final TextEditingController howToDownloadAdmitCardController =
+      TextEditingController();
+  final TextEditingController correctionInFormLinkController =
+      TextEditingController();
+
+  // Numeric fields controllers
   late TextEditingController minAgeController;
   late TextEditingController maxAgeController;
   late TextEditingController generalCategoryFeeController;
@@ -27,6 +56,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   late TextEditingController ewsCategoryFeeController;
   late TextEditingController scstCategoryFeeController;
   late TextEditingController phCategoryFeeController;
+  final TextEditingController PostnameController = TextEditingController();
+  final TextEditingController womenCategoryFeeController = TextEditingController();
 
   // Date fields
   DateTime? applicationBegin;
@@ -38,15 +69,27 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   DateTime? resultPostingDate;
   DateTime? examDate;
   DateTime? ageFrom;
+  DateTime? ageUpto;
+  DateTime? admitCardAvailableEdit;
+  DateTime? answerKeyAvailableEdit;
+  DateTime? resultPostModify;
+  DateTime? correctiondateInForm;
+  DateTime? jobPostingDate;
 
   // Selected category id and name
   String? selectedCategory;
+  String? selectedPost;
+  String? selectedeligibilityDetails;
   String? selectedCategoryName;
 
   bool isadmitCardAvailable = false;
   bool isanswerKeyAvailable = false;
   bool syllabusAvailable = false;
   bool resultAvailable = false;
+  bool multiPost = false;
+  bool shortNotice = false;
+  bool downloadBroucher = false;
+  bool correctionInForm = false;
 
   bool isLoading = true;
 

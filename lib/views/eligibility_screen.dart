@@ -74,17 +74,17 @@ class _EligibilityState extends State<EligibilityScreen> {
                     ),
                     TextButton(
                       onPressed: () {
+                        context.go('/categories');
+                      },
+                      child:
+                          Text("Category", style: TextStyle(color: Colors.white)),
+                    ),
+                    TextButton(
+                      onPressed: () {
                         context.go('/posts');
                       },
                       child:
                           Text("Posts", style: TextStyle(color: Colors.white)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.go('/eligibilities');
-                      },
-                      child: Text("Eligibility",
-                          style: TextStyle(color: Colors.white)),
                     ),
                     IconButton(
                       icon: Icon(Icons.logout, color: Colors.white),
@@ -258,7 +258,7 @@ class _EligibilityState extends State<EligibilityScreen> {
                                             color: Colors.blue),
                                         onPressed: () {
                                           context.go(
-                                              '/categories/update/${eligibility["id"]}');
+                                              '/eligibilities/update/${eligibility["id"]}');
                                         },
                                       ),
                                       IconButton(

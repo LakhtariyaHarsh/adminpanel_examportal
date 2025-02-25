@@ -8,6 +8,7 @@ import 'package:admin_panel/views/eligibility_screen.dart';
 import 'package:admin_panel/views/login_screen.dart';
 import 'package:admin_panel/views/post_screen.dart';
 import 'package:admin_panel/views/update_category.dart';
+import 'package:admin_panel/views/update_eligibilty.dart';
 import 'package:admin_panel/views/update_exam_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -78,6 +79,14 @@ GoRouter getAppRouter(String initialRoute) {
         name: 'addeligibility',
         path: '/eligibilities/add',
         pageBuilder: (context, state) => MaterialPage(child: AddEligibility()),
+      ),
+      GoRoute(
+        name: 'updateeligibility',
+        path: '/eligibilities/update/:eligibilityId',
+        builder: (context, state) {
+          final eligibilityId = state.pathParameters['eligibilityId']!;
+          return UpdateEligibility(id: eligibilityId);
+        },
       ),
     ],
   );

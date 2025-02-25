@@ -16,7 +16,7 @@ class PostViewModel extends ChangeNotifier {
 
   List<Map<String, dynamic>> get searchResults => _searchResults;
 
-  postViewModel() {
+  PostViewModel() {
     fetchAllData();
   }
 
@@ -56,6 +56,9 @@ class PostViewModel extends ChangeNotifier {
           "name": post["postName"].toString(),
         };
       }).toList();
+
+      print(fetchedPosts.first);
+      print("These is the fetched post..............................................................");
 
       totalPages = data["totalPages"];
 

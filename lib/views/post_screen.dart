@@ -73,11 +73,12 @@ class _PostState extends State<PostScreen> {
                     ),
                     TextButton(
                       onPressed: () {
-                        context.go('/posts');
+                        context.go('/categories');
                       },
                       child:
-                          Text("Posts", style: TextStyle(color: Colors.white)),
+                          Text("Category", style: TextStyle(color: Colors.white)),
                     ),
+                    
                     TextButton(
                       onPressed: () {
                         context.go('/eligibilities');

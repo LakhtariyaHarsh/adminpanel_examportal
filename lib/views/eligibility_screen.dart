@@ -190,7 +190,7 @@ class _EligibilityState extends State<EligibilityScreen> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/categories/add');
+          context.go('/eligibilities/add');
         },
         child: Icon(Icons.add),
       ),

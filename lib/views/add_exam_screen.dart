@@ -1,4 +1,6 @@
 import 'package:admin_panel/view_models/Category_view_model.dart';
+import 'package:admin_panel/view_models/Eligibility_view_model.dart';
+import 'package:admin_panel/view_models/post_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +27,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
   final TextEditingController scstCategoryFeeController =
       TextEditingController();
   final TextEditingController phCategoryFeeController = TextEditingController();
+  final TextEditingController PostnameController = TextEditingController();
 
   // Date fields
   DateTime? applicationBegin;
@@ -36,8 +39,10 @@ class _AddExamScreenState extends State<AddExamScreen> {
   DateTime? resultPostingDate;
   DateTime? examDate;
   DateTime? ageFrom;
-   
+
   String? selectedCategory;
+  String? selectedPost;
+  String? selectedeligibilityDetails;
 
   bool isAdmitCardAvailable = false;
   bool isAnswerKeyAvailable = false;
@@ -122,9 +127,13 @@ class _AddExamScreenState extends State<AddExamScreen> {
     );
   }
 
-  // Styled TextField
-  Widget _buildTextField(TextEditingController controller, String label,
-      {bool isNumber = false}) {
+  // Helper: Styled TextField with optional validation
+  Widget _buildTextFieldWithValidation(
+    TextEditingController controller,
+    String label, {
+    bool isNumber = false,
+    bool isRequired = false,
+  }) {
     return _styledCard(
       TextFormField(
         controller: controller,
@@ -135,24 +144,33 @@ class _AddExamScreenState extends State<AddExamScreen> {
           filled: true,
           fillColor: Colors.white,
         ),
-        validator: (value) => value!.isEmpty ? "Enter $label" : null,
+        validator: isRequired
+            ? (value) =>
+                (value == null || value.isEmpty) ? "Enter $label" : null
+            : null,
       ),
     );
+  }
+
+  int? parseNullableInt(String text) {
+    return text.trim().isEmpty ? null : int.tryParse(text);
   }
 
   @override
   Widget build(BuildContext context) {
     final examViewModel = Provider.of<ExamViewModel>(context);
-   final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 720;
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
-
+    final postViewModel = Provider.of<PostViewModel>(context);
+    final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(backgroundColor: const Color.fromARGB(255, 146, 156, 160),
+      appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 146, 156, 160),
           title: Text("Add Exam", style: TextStyle(color: Colors.white))),
       body: SingleChildScrollView(
         child: Center(
@@ -164,12 +182,18 @@ class _AddExamScreenState extends State<AddExamScreen> {
             child: Padding(
               padding: EdgeInsets.all(16.0),
               child: Container(
-               width: isDesktop ? screenWidth * 0.4 : isTablet ? screenWidth * 0.7 : screenWidth * 0.95,
+                width: isDesktop
+                    ? screenWidth * 0.4
+                    : isTablet
+                        ? screenWidth * 0.7
+                        : screenWidth * 0.95,
                 child: Form(
                   key: _formKey,
                   child: Column(
                     children: [
-                      _buildTextField(nameController, "Exam Name"),
+                      // Required field: Exam Name
+                      _buildTextFieldWithValidation(nameController, "Exam Name",
+                          isRequired: true),
 
                       _styledCard(
                         Column(
@@ -210,11 +234,12 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                             ),
                                           ))
                                       .toList(),
-                                  onChanged:  (value) {
+                                  onChanged: (value) {
                                     setState(() {
                                       selectedCategory = value;
                                     });
-                                    print("Selected Category: $selectedCategory");
+                                    print(
+                                        "Selected Category: $selectedCategory");
                                   },
                                 ),
                               ),
@@ -222,8 +247,110 @@ class _AddExamScreenState extends State<AddExamScreen> {
                           ],
                         ),
                       ),
-                      SizedBox(
-                        height: 20,
+
+                      _styledCard(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: DropdownButtonFormField<String>(
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    hintText: "Select PostName",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color: Colors.blue,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                  ),
+                                  value: selectedPost,
+                                  items: postViewModel.posts
+                                      .map((post) => DropdownMenuItem(
+                                            value: post["id"] as String,
+                                            child: Text(
+                                              post["name"] as String,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 3,
+                                            ),
+                                          ))
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedPost = value;
+                                    });
+                                    print("Selected post: $selectedPost");
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      _styledCard(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: DropdownButtonFormField<String>(
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    hintText: "Select Eligibility Details",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color: Colors.blue,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                  ),
+                                  value: selectedeligibilityDetails,
+                                  items: eligibilityViewModel.eligibilities
+                                      .map((eligibility) => DropdownMenuItem(
+                                            value: eligibility["id"] as String,
+                                            child: Text(
+                                              eligibility["name"] as String,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 3,
+                                            ),
+                                          ))
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedeligibilityDetails = value;
+                                    });
+                                    print(
+                                        "Selected Category: $selectedeligibilityDetails");
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
 
                       _buildDatePicker(
@@ -277,26 +404,26 @@ class _AddExamScreenState extends State<AddExamScreen> {
                       _buildDatePicker("Age From", ageFrom,
                           (date) => setState(() => ageFrom = date)),
 
-                      _buildTextField(minAgeController, "Min Age",
+                      // Required Numeric fields (Min/Max Age and Fees)
+                      _buildTextFieldWithValidation(minAgeController, "Min Age",
                           isNumber: true),
-                      _buildTextField(maxAgeController, "Max Age",
+                      _buildTextFieldWithValidation(maxAgeController, "Max Age",
                           isNumber: true),
-                      _buildTextField(
+                      _buildTextFieldWithValidation(
                           generalCategoryFeeController, "General Category Fee",
                           isNumber: true),
-                      _buildTextField(
+                      _buildTextFieldWithValidation(
                           obcCategoryFeeController, "OBC Category Fee",
                           isNumber: true),
-                      _buildTextField(
+                      _buildTextFieldWithValidation(
                           ewsCategoryFeeController, "EWS Category Fee",
                           isNumber: true),
-                      _buildTextField(
+                      _buildTextFieldWithValidation(
                           scstCategoryFeeController, "SC/ST Category Fee",
                           isNumber: true),
-                      _buildTextField(
+                      _buildTextFieldWithValidation(
                           phCategoryFeeController, "PH Category Fee",
                           isNumber: true),
-
                       // Submit Button
                       SizedBox(height: 20),
                       ElevatedButton(
@@ -305,18 +432,20 @@ class _AddExamScreenState extends State<AddExamScreen> {
                             Map<String, dynamic> newExam = {
                               "name": nameController.text,
                               "examCategory": selectedCategory,
-                              "minAge": int.parse(minAgeController.text),
-                              "maxAge": int.parse(maxAgeController.text),
-                              "generalCategoryFee":
-                                  int.parse(generalCategoryFeeController.text),
-                              "obcCategoryFee":
-                                  int.parse(obcCategoryFeeController.text),
-                              "ewsCategoryFee":
-                                  int.parse(ewsCategoryFeeController.text),
-                              "scstCategoryFee":
-                                  int.parse(scstCategoryFeeController.text),
-                              "phCategoryFee":
-                                  int.parse(phCategoryFeeController.text),
+                              "eligibilityCriteria": selectedeligibilityDetails,
+                              "postDetails": selectedPost,
+                              "minAge": parseNullableInt(minAgeController.text),
+                              "maxAge": parseNullableInt(maxAgeController.text),
+                              "generalCategoryFee": parseNullableInt(
+                                  generalCategoryFeeController.text),
+                              "obcCategoryFee": parseNullableInt(
+                                  obcCategoryFeeController.text),
+                              "ewsCategoryFee": parseNullableInt(
+                                  ewsCategoryFeeController.text),
+                              "scstCategoryFee": parseNullableInt(
+                                  scstCategoryFeeController.text),
+                              "phCategoryFee": parseNullableInt(
+                                  phCategoryFeeController.text),
 
                               // Store Dates (Convert to ISO format)
                               "applicationBegin":

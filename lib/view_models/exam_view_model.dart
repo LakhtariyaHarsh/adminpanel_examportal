@@ -23,7 +23,7 @@ class ExamViewModel extends ChangeNotifier {
   List<Map<String, String>> get exams => _exams;
   bool isLoading = false;
   int page = 1;
-  int limit = 5;
+  int limit = 20;
   int totalPages = 1;
 
   ExamViewModel() {

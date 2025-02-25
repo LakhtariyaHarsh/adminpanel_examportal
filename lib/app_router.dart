@@ -1,5 +1,7 @@
 import 'package:admin_panel/views/add_category.dart';
+import 'package:admin_panel/views/add_eligibility.dart';
 import 'package:admin_panel/views/add_exam_screen.dart';
+import 'package:admin_panel/views/add_post.dart';
 import 'package:admin_panel/views/admin_dashboard.dart';
 import 'package:admin_panel/views/category.dart';
 import 'package:admin_panel/views/eligibility_screen.dart';
@@ -66,6 +68,16 @@ GoRouter getAppRouter(String initialRoute) {
           final categoryId = state.pathParameters['categoryId']!;
           return UpdateCategory(id: categoryId);
         },
+      ),
+       GoRoute(
+        name: 'addpost',
+        path: '/posts/add',
+        pageBuilder: (context, state) => MaterialPage(child: AddPostScreen()),
+      ),
+       GoRoute(
+        name: 'addeligibility',
+        path: '/eligibilities/add',
+        pageBuilder: (context, state) => MaterialPage(child: AddEligibility()),
       ),
     ],
   );

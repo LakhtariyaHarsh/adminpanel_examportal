@@ -1,4 +1,5 @@
 import 'package:admin_panel/view_models/post_view_model.dart';
+import 'package:admin_panel/views/add_post.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -17,8 +18,7 @@ class _PostState extends State<PostScreen> {
   @override
   void initState() {
     super.initState();
-    final postViewModel =
-        Provider.of<PostViewModel>(context, listen: false);
+    final postViewModel = Provider.of<PostViewModel>(context, listen: false);
     // Fetch initial categories.
     postViewModel.fetchPosts();
     _scrollController.addListener(_scrollListener);
@@ -35,10 +35,10 @@ class _PostState extends State<PostScreen> {
   void _scrollListener() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      final postViewModel =
-          Provider.of<PostViewModel>(context, listen: false);
+      final postViewModel = Provider.of<PostViewModel>(context, listen: false);
       // If not loading and more pages exist, fetch more.
-      if (!postViewModel.isLoading && postViewModel.page < postViewModel.totalPages) {
+      if (!postViewModel.isLoading &&
+          postViewModel.page < postViewModel.totalPages) {
         postViewModel.fetchPosts(isLoadMore: true);
       }
     }
@@ -50,9 +50,8 @@ class _PostState extends State<PostScreen> {
     final postViewModel = Provider.of<PostViewModel>(context);
     // If a search query is active, use the search results; otherwise, show the full list.
     final bool isSearching = _searchQuery.isNotEmpty;
-    final List displayedPosts = isSearching
-        ? postViewModel.searchResults
-        : postViewModel.posts;
+    final List displayedPosts =
+        isSearching ? postViewModel.searchResults : postViewModel.posts;
 
     final double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 720;
@@ -69,8 +68,8 @@ class _PostState extends State<PostScreen> {
                       onPressed: () {
                         context.go('/');
                       },
-                      child: Text("Exams",
-                          style: TextStyle(color: Colors.white)),
+                      child:
+                          Text("Exams", style: TextStyle(color: Colors.white)),
                     ),
                     TextButton(
                       onPressed: () {
@@ -190,7 +189,10 @@ class _PostState extends State<PostScreen> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/categories/add');
+//           context.go('/posts/add', // Passing ViewModel manually
+// );
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => AddPostScreen()));
         },
         child: Icon(Icons.add),
       ),
@@ -284,7 +286,8 @@ class _PostState extends State<PostScreen> {
                         ),
                       ),
                       // Optional: A loader at the bottom when loading more data.
-                      if (postViewModel.isLoading && postViewModel.posts.isNotEmpty)
+                      if (postViewModel.isLoading &&
+                          postViewModel.posts.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: CircularProgressIndicator(),

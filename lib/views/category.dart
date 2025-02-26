@@ -194,7 +194,7 @@ class _CategoryState extends State<Category> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/categories/add');
+          context.push('/categories/add');
         },
         child: Icon(Icons.add),
       ),
@@ -261,7 +261,7 @@ class _CategoryState extends State<Category> {
                                         icon: Icon(Icons.edit,
                                             color: Colors.blue),
                                         onPressed: () {
-                                          context.go(
+                                          context.push(
                                               '/categories/update/${category["id"]}');
                                         },
                                       ),

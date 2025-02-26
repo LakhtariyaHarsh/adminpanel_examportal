@@ -309,6 +309,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                     print(
                                         "Selected Category: $selectedCategory");
                                   },
+                                   validator: (value) => value == null ? "Please select a category" : null, // Validation
                                 ),
                               ),
                             ),

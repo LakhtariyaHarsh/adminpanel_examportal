@@ -190,7 +190,7 @@ class _EligibilityState extends State<EligibilityScreen> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/eligibilities/add');
+          context.push('/eligibilities/add');
         },
         child: Icon(Icons.add),
       ),
@@ -257,7 +257,7 @@ class _EligibilityState extends State<EligibilityScreen> {
                                         icon: Icon(Icons.edit,
                                             color: Colors.blue),
                                         onPressed: () {
-                                          context.go(
+                                          context.push(
                                               '/eligibilities/update/${eligibility["id"]}');
                                         },
                                       ),

@@ -191,7 +191,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/exams/add');
+          context.push('/exams/add');
         },
         child: Icon(Icons.add),
       ),
@@ -260,21 +260,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                         icon: Icon(Icons.edit,
                                             color: Colors.blue),
                                         onPressed: () async {
-                                          final updated =
-                                              await GoRouter.of(context).push(
+                                        GoRouter.of(context).push(
                                             '/exams/update/${exam["id"]}/${Uri.encodeComponent(exam["name"] ?? "")}/${exam["examcategory"]}?postid=${exam["postDetails"] ?? ""}&eligibilityid=${exam["eligibilityCriteria"] ?? ""}',
                                           );
 
-                                          if (updated == true) {
-                                            // After updating, refresh the exams list.
-                                            examViewModel.fetchExams();
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(
-                                                      "Exam updated successfully")),
-                                            );
-                                          }
+                                          // if (updated == true) {
+                                          //   // After updating, refresh the exams list.
+                                          //   examViewModel.fetchExams();
+                                          //   ScaffoldMessenger.of(context)
+                                          //       .showSnackBar(
+                                          //     SnackBar(
+                                          //         content: Text(
+                                          //             "Exam updated successfully")),
+                                          //   );
+                                          // }
                                         },
                                       ),
                                       IconButton(

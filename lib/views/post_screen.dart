@@ -190,7 +190,7 @@ class _PostState extends State<PostScreen> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go(
+          context.push(
             '/posts/add', // Passing ViewModel manually
           );
         },

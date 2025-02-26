@@ -75,10 +75,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     ),
                     TextButton(
                       onPressed: () {
-                         context.go('/posts');
+                        context.go('/posts');
                       },
-                      child: Text("Posts",
-                          style: TextStyle(color: Colors.white)),
+                      child:
+                          Text("Posts", style: TextStyle(color: Colors.white)),
                     ),
                     TextButton(
                       onPressed: () {
@@ -158,7 +158,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 color: Colors.blueGrey),
                             title: const Text("Posts"),
                             onTap: () {
-                               context.go('/posts');
+                              context.go('/posts');
                             },
                           ),
                           Divider(),
@@ -260,18 +260,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                         icon: Icon(Icons.edit,
                                             color: Colors.blue),
                                         onPressed: () async {
-                                          final updated = await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  UpdateExamScreen(
-                                                id: exam["id"] ?? "",
-                                                examName: exam["name"] ?? "",
-                                                categoryid:
-                                                    exam["examcategory"] ?? "", postid: exam["postDetails"] ?? "",eligibilityid: exam["eligibilityCriteria"] ?? "",
-                                              ),
-                                            ),
+                                          final updated =
+                                              await GoRouter.of(context).push(
+                                            '/exams/update/${exam["id"]}/${Uri.encodeComponent(exam["name"] ?? "")}/${exam["examcategory"]}?postid=${exam["postDetails"] ?? ""}&eligibilityid=${exam["eligibilityCriteria"] ?? ""}',
                                           );
+
                                           if (updated == true) {
                                             // After updating, refresh the exams list.
                                             examViewModel.fetchExams();
@@ -288,9 +281,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                         icon: Icon(Icons.delete,
                                             color: Colors.red),
                                         onPressed: () async {
-                                          bool success = await examViewModel
-                                                  .deleteExam(exam["id"] ?? "") ??
-                                              false;
+                                          bool success =
+                                              await examViewModel.deleteExam(
+                                                      exam["id"] ?? "") ??
+                                                  false;
                                           if (success) {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(

@@ -1,5 +1,6 @@
 import 'package:admin_panel/view_models/post_view_model.dart';
 import 'package:admin_panel/views/add_post.dart';
+import 'package:admin_panel/views/update_post.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -75,10 +76,9 @@ class _PostState extends State<PostScreen> {
                       onPressed: () {
                         context.go('/categories');
                       },
-                      child:
-                          Text("Category", style: TextStyle(color: Colors.white)),
+                      child: Text("Category",
+                          style: TextStyle(color: Colors.white)),
                     ),
-                    
                     TextButton(
                       onPressed: () {
                         context.go('/eligibilities');
@@ -190,10 +190,9 @@ class _PostState extends State<PostScreen> {
           : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-//           context.go('/posts/add', // Passing ViewModel manually
-// );
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddPostScreen()));
+          context.go(
+            '/posts/add', // Passing ViewModel manually
+          );
         },
         child: Icon(Icons.add),
       ),
@@ -260,8 +259,9 @@ class _PostState extends State<PostScreen> {
                                         icon: Icon(Icons.edit,
                                             color: Colors.blue),
                                         onPressed: () {
-                                          context.go(
-                                              '/posts/update/${post["id"]}');
+                                          GoRouter.of(context).push(
+                                            '/posts/update/${post["id"]}?postName=${Uri.encodeComponent(post["name"] ?? "")}&eligibilityid=${post["eligiblityDetails"] ?? ""}',
+                                          );
                                         },
                                       ),
                                       IconButton(

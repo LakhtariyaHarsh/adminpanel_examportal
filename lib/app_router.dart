@@ -10,6 +10,7 @@ import 'package:admin_panel/views/post_screen.dart';
 import 'package:admin_panel/views/update_category.dart';
 import 'package:admin_panel/views/update_eligibilty.dart';
 import 'package:admin_panel/views/update_exam_screen.dart';
+import 'package:admin_panel/views/update_post.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,7 +36,8 @@ GoRouter getAppRouter(String initialRoute) {
       GoRoute(
         name: 'eligibility',
         path: '/eligibilities',
-        pageBuilder: (context, state) => MaterialPage(child: EligibilityScreen()),
+        pageBuilder: (context, state) =>
+            MaterialPage(child: EligibilityScreen()),
       ),
       GoRoute(
         name: 'login',
@@ -52,17 +54,29 @@ GoRouter getAppRouter(String initialRoute) {
         path: '/exams/update/:examId/:examName/:categoryId',
         builder: (context, state) {
           final examId = state.pathParameters['examId']!;
-          final examName = Uri.decodeComponent(state.pathParameters['examName']!);
+          final examName =
+              Uri.decodeComponent(state.pathParameters['examName']!);
           final categoryId = state.pathParameters['categoryId']!;
-          final postid = state.pathParameters['postid']!;
-          final eligibilityid = state.pathParameters['eligibilityid']!;
-          return UpdateExamScreen(id: examId, examName: examName, categoryid: categoryId, postid: postid, eligibilityid: eligibilityid);
+
+          // Retrieve query parameters
+          final postid = state.uri.queryParameters['postid'] ?? "";
+          final eligibilityid =
+              state.uri.queryParameters['eligibilityid'] ?? "";
+
+          return UpdateExamScreen(
+            id: examId,
+            examName: examName,
+            categoryid: categoryId,
+            postid: postid,
+            eligibilityid: eligibilityid,
+          );
         },
       ),
       GoRoute(
         name: 'addcategory',
         path: '/categories/add',
-        pageBuilder: (context, state) => MaterialPage(child: AddCategoryScreen()),
+        pageBuilder: (context, state) =>
+            MaterialPage(child: AddCategoryScreen()),
       ),
       GoRoute(
         name: 'updatecategory',
@@ -72,12 +86,28 @@ GoRouter getAppRouter(String initialRoute) {
           return UpdateCategory(id: categoryId);
         },
       ),
-       GoRoute(
+      GoRoute(
         name: 'addpost',
         path: '/posts/add',
         pageBuilder: (context, state) => MaterialPage(child: AddPostScreen()),
       ),
-       GoRoute(
+      GoRoute(
+        name: 'updatepost',
+        path: '/posts/update/:categoryId',
+        builder: (context, state) {
+          final categoryId = state.pathParameters['categoryId']!;
+          final postName = state.uri.queryParameters['postName'] ?? "";
+          final eligibilityid =
+              state.uri.queryParameters['eligibilityid'] ?? "";
+
+          return UpdatePostScreen(
+            id: categoryId,
+            postName: postName,
+            eligibilityid: eligibilityid,
+          );
+        },
+      ),
+      GoRoute(
         name: 'addeligibility',
         path: '/eligibilities/add',
         pageBuilder: (context, state) => MaterialPage(child: AddEligibility()),

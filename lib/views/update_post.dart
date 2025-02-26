@@ -1,9 +1,7 @@
-import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:admin_panel/view_models/Eligibility_view_model.dart';
 import 'package:admin_panel/view_models/post_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../view_models/exam_view_model.dart';
 
 class UpdatePostScreen extends StatefulWidget {
   final String postName;
@@ -162,13 +160,9 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final examViewModel = Provider.of<ExamViewModel>(context);
-    final double screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isMobile = screenWidth < 720;
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
-    final categoryViewModel = Provider.of<CategoryViewModel>(context);
     final postViewModel = Provider.of<PostViewModel>(context);
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
 
@@ -203,33 +197,26 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                 isRequired: true),
 
                             // Numeric Fields (Allowed to be null)
-                            // _buildTextFieldWithValidation(
-                            //     minAgeController, "Min Age",
-                            //     isNumber: true),
-                            // _buildTextFieldWithValidation(
-                            //     maxAgeController, "Max Age",
-                            //     isNumber: true),
-                            // _buildTextFieldWithValidation(
-                            //     generalCategoryFeeController,
-                            //     "General Category Fee",
-                            //     isNumber: true),
-                            // _buildTextFieldWithValidation(
-                            //     obcCategoryFeeController, "OBC Category Fee",
-                            //     isNumber: true),
-                            // _buildTextFieldWithValidation(
-                            //     ewsCategoryFeeController, "EWS Category Fee",
-                            //     isNumber: true),
-                            // _buildTextFieldWithValidation(
-                            //     scstCategoryFeeController, "SC/ST Category Fee",
-                            //     isNumber: true),
-                            // _buildTextFieldWithValidation(
-                            //     phCategoryFeeController, "PH Category Fee",
-                            //     isNumber: true),
-                            // _buildTextFieldWithValidation(
-                            //     womenCategoryFeeController,
-                            //     "Women Category Fee",
-                            //     isNumber: true),
+                            _buildTextFieldWithValidation(
+                                TotalPostController, "Total Post",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                generalPostController, "General Post",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                obcPostController, "OBC Post",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                ewsPostController, "EWS Post",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                scPostController, "SC Post",
+                                isNumber: true),
+                            _buildTextFieldWithValidation(
+                                stPostController, "ST Post",
+                                isNumber: true),
 
+                            // Category Dropdown
                             _styledCard(
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,7 +269,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                             selectedeligibilityDetails = value;
                                           });
                                           print(
-                                              "Selected Category: $selectedeligibilityDetails");
+                                              "Selected eligibility: $selectedeligibilityDetails");
                                         },
                                       ),
                                     ),
@@ -295,110 +282,28 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                             ElevatedButton(
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  Map<String, dynamic> updatedExam = {
-                                    // "name": nameController.text,
-                                    // "examCategory": selectedCategory,
-                                    // "postDate": DateTime.now()
-                                    //     .toIso8601String(), // Example auto-generated field
-                                    // "shortInformation":
-                                    //     shortInformationController.text,
-                                    // "organizationName":
-                                    //     organizationNameController.text,
-                                    // "fullNameOfExam":
-                                    //     fullNameOfExamController.text,
-                                    // "advertisementNo":
-                                    //     advertisementNoController.text,
-                                    // "applicationBegin":
-                                    //     applicationBegin?.toIso8601String(),
-                                    // "lastDateToApply":
-                                    //     lastDateToApply?.toIso8601String(),
-                                    // "lastDateToPayExamFee":
-                                    //     lastDateToPayExamFee?.toIso8601String(),
-                                    // "examDate": examDate?.toIso8601String(),
-                                    // "isadmitCardAvailable":
-                                    //     isadmitCardAvailable,
-                                    // "admitCardAvailable":
-                                    //     admitCardAvailable?.toIso8601String(),
-                                    // "admitCardAvailableEdit":
-                                    //     admitCardAvailableEdit
-                                    //         ?.toIso8601String(),
-                                    // "isanswerKeyAvailable":
-                                    //     isanswerKeyAvailable,
-                                    // "answerKeyAvailable":
-                                    //     answerKeyAvailable?.toIso8601String(),
-                                    // "answerKeyAvailableEdit":
-                                    //     answerKeyAvailableEdit
-                                    //         ?.toIso8601String(),
-                                    // "generalCategoryFee": parseNullableInt(
-                                    //     generalCategoryFeeController.text),
-                                    // "obcCategoryFee": parseNullableInt(
-                                    //     obcCategoryFeeController.text),
-                                    // "ewsCategoryFee": parseNullableInt(
-                                    //     ewsCategoryFeeController.text),
-                                    // "scstCategoryFee": parseNullableInt(
-                                    //     scstCategoryFeeController.text),
-                                    // "phCategoryFee": parseNullableInt(
-                                    //     phCategoryFeeController.text),
-                                    // "womenCategoryFee": parseNullableInt(
-                                    //     womenCategoryFeeController.text),
-                                    // "howToPay": howToPayController.text,
-                                    // "minAge":
-                                    //     parseNullableInt(minAgeController.text),
-                                    // "maxAge":
-                                    //     parseNullableInt(maxAgeController.text),
-                                    // "ageRelaxationBrief":
-                                    //     ageRelaxationBriefController.text,
-                                    // "ageFrom": ageFrom?.toIso8601String(),
-                                    // "ageUpto": ageUpto?.toIso8601String(),
-                                    // "multiPost": multiPost,
-                                    // "postDetails": selectedPost,
-                                    // "applyOnline": applyOnlineController.text,
-                                    // "shortNotice": shortNotice,
-                                    // "downloadShortNotice":
-                                    //     downloadShortNoticeController.text,
-                                    // "downloadNotification":
-                                    //     downloadNotificationController.text,
-                                    // "officialWebsite":
-                                    //     officialWebsiteController.text,
-                                    // "eligibilityCriteria":
-                                    //     selectedeligibilityDetails,
-                                    // "downloadBroucher": downloadBroucher,
-                                    // "broucherLink": broucherLinkController.text,
-                                    // "syllabusAvailable": syllabusAvailable,
-                                    // "syllabusAvailableDate":
-                                    //     syllabusAvailableDate
-                                    //         ?.toIso8601String(),
-                                    // "resultAvailable": resultAvailable,
-                                    // "resultPostingDate":
-                                    //     resultPostingDate?.toIso8601String(),
-                                    // "resultPostModify":
-                                    //     resultPostModify?.toIso8601String(),
-                                    // "resultlink": resultlinkController.text,
-                                    // "howToCheckResult":
-                                    //     howToCheckResultController.text,
-                                    // "howToFillForm":
-                                    //     howToFillFormController.text,
-                                    // "howToDownloadAdmitCard":
-                                    //     howToDownloadAdmitCardController.text,
-                                    // "correctionInForm": correctionInForm,
-                                    // "correctionInFormLink":
-                                    //     correctionInFormLinkController.text,
-                                    // "correctiondateInForm":
-                                    //     correctiondateInForm?.toIso8601String(),
-                                    // "jobPostingDate":
-                                    //     jobPostingDate?.toIso8601String(),
+                                  Map<String, dynamic> updatedPost = {
+                                    "postName": PostnameController.text,
+                                    "eligiblityDetails": selectedeligibilityDetails,
+                                    "totalPost": parseNullableInt(TotalPostController.text),
+                                    "generalPost": parseNullableInt(generalPostController.text),
+                                    "obcPost": parseNullableInt(obcPostController.text),
+                                    "ewsPost": parseNullableInt(ewsPostController.text),
+                                    "scPost": parseNullableInt(scPostController.text),
+                                    "stPost": parseNullableInt(stPostController.text),
+
                                   };
 
-                                  await examViewModel.updateExam(
-                                      widget.id, updatedExam);
+                                  await postViewModel.updatePost(
+                                      widget.id, updatedPost);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                           content: Text(
-                                              "Exam updated successfully!")));
+                                              "Post updated successfully!")));
                                   Navigator.pop(context, true);
                                 }
                               },
-                              child: Text("Update Exam"),
+                              child: Text("Update Post"),
                             ),
                           ],
                         ),

@@ -45,7 +45,6 @@ class _LoginScreenState extends State<LoginScreen> {
        final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.blueGrey[50], // Light background color
       body: Center(
         child: _isLoading
             ? CircularProgressIndicator() // ✅ Show loading indicator while checking token
@@ -54,6 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: SizedBox(
                   width: screenWidth >= 1024 ? screenWidth * 0.3: screenWidth * 0.9,
                   child: Card(
+                    color: Colors.blueGrey.shade50,
                     elevation: 5,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),

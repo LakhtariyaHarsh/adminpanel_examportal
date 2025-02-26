@@ -55,17 +55,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
         : examViewModel.exams;
     final double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 720;
-    bool isDesktop = screenWidth >= 1024;
+    bool isDesktop = screenWidth >= 1100;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-        title: Text("Admin Dashboard Exams",
+        title: Text("ALL EXAMS",
             style: TextStyle(color: Colors.white)),
         actions: screenWidth >= 720
             ? [
                 Row(
                   children: [
+                    TextButton(
+                      onPressed: () {
+                        context.go('/');
+                      },
+                      child:
+                          Text("Home", style: TextStyle(color: Colors.white)),
+                    ),
                     TextButton(
                       onPressed: () {
                         context.go('/categories');
@@ -138,12 +145,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           ListTile(
                             leading: const Icon(Icons.school,
                                 color: Colors.blueGrey),
-                            title: const Text("Exams"),
+                            title: const Text("Dashboard"),
                             onTap: () {
                               context.go('/');
                             },
                           ),
                           Divider(),
+                          ListTile(
+                                leading: const Icon(Icons.send_and_archive_outlined,
+                                    color: Colors.blueGrey),
+                                title: const Text("Exams"),
+                                onTap: () {
+                                  context.go('/exams');
+                                },
+                              ),
+                              Divider(),
                           ListTile(
                             leading: const Icon(Icons.category,
                                 color: Colors.blueGrey),
@@ -195,125 +211,210 @@ class _AdminDashboardState extends State<AdminDashboard> {
         },
         child: Icon(Icons.add),
       ),
-      body: examViewModel.isLoading && examViewModel.exams.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : Center(
-              child: Container(
-                width: isDesktop ? screenWidth * 0.7 : screenWidth * 0.95,
-                color: Colors.blueGrey[50],
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      // Search Bar
-                      TextField(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          // If search query is empty, clear search results.
-                          if (value.isEmpty) {
-                            examViewModel.clearSearch();
-                          } else {
-                            // Otherwise, perform search.
-                            examViewModel.searchExams(value);
-                          }
-                        },
-                        decoration: InputDecoration(
-                          labelText: "Search Exams",
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          filled: true,
-                          fillColor: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: displayedExams.length +
-                              1, // Add extra item for a loading indicator if needed.
-                          itemBuilder: (context, index) {
-                            if (index == displayedExams.length) {
-                              return examViewModel.isLoadingMore
-                                  ? Center(child: CircularProgressIndicator())
-                                  : SizedBox();
-                            }
-                            final exam = displayedExams[index];
-                            return Card(
-                              margin: EdgeInsets.symmetric(vertical: 10),
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: ListTile(
-                                title: Text(
-                                  exam["name"] ?? "",
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500),
+      body: Row(
+        children: [
+          //Drawer for desktop
+          isDesktop
+              ? Drawer(
+                  child: Container(
+                    color: const Color(0xffe3e4e6),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: DrawerHeader(
+                            decoration: const BoxDecoration(
+                              color: Color.fromARGB(255, 244, 245, 246),
+                            ),
+                            child: const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.dashboard,
+                                  size: 40,
+                                  color: Colors.blueGrey,
                                 ),
-                                trailing: SizedBox(
-                                  width: 100,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(Icons.edit,
-                                            color: Colors.blue),
-                                        onPressed: () async {
-                                        GoRouter.of(context).push(
-                                            '/exams/update/${exam["id"]}/${Uri.encodeComponent(exam["name"] ?? "")}/${exam["examcategory"]}?postid=${exam["postDetails"] ?? ""}&eligibilityid=${exam["eligibilityCriteria"] ?? ""}',
-                                          );
-
-                                          // if (updated == true) {
-                                          //   // After updating, refresh the exams list.
-                                          //   examViewModel.fetchExams();
-                                          //   ScaffoldMessenger.of(context)
-                                          //       .showSnackBar(
-                                          //     SnackBar(
-                                          //         content: Text(
-                                          //             "Exam updated successfully")),
-                                          //   );
-                                          // }
-                                        },
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.delete,
-                                            color: Colors.red),
-                                        onPressed: () async {
-                                          bool success =
-                                              await examViewModel.deleteExam(
-                                                      exam["id"] ?? "") ??
-                                                  false;
-                                          if (success) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(
-                                                      "Exam deleted successfully")),
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(
-                                                      "Failed to delete exam")),
-                                            );
-                                          }
-                                        },
-                                      )
-                                    ],
+                                SizedBox(height: 10),
+                                Text(
+                                  "ADMIN DASHBOARD",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              ],
+                            ),
+                          ),
                         ),
+                        Expanded(
+                          child: ListView(
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.school,
+                                    color: Colors.blueGrey),
+                                title: const Text("Dashboard"),
+                                onTap: () {
+                                  context.go('/');
+                                },
+                              ),
+                              Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.send_and_archive_outlined,
+                                    color: Colors.blueGrey),
+                                title: const Text("Exams"),
+                                onTap: () {
+                                  context.go('/exams');
+                                },
+                              ),
+                              Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.category,
+                                    color: Colors.blueGrey),
+                                title: const Text("Category"),
+                                onTap: () {
+                                  context.go('/categories');
+                                },
+                              ),
+                              Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.article,
+                                    color: Colors.blueGrey),
+                                title: const Text("Posts"),
+                                onTap: () {
+                                  context.go('/posts');
+                                },
+                              ),
+                              Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.verified_user,
+                                    color: Colors.blueGrey),
+                                title: const Text("Eligibility"),
+                                onTap: () {
+                                  context.go('/eligibilities');
+                                },
+                              ),
+                              Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.logout,
+                                    color: Colors.blueGrey),
+                                title: const Text("Logout"),
+                                onTap: () {
+                                  authViewModel.logout();
+                                  context.go('/login');
+                                },
+                              ),
+                              Divider(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : SizedBox(),
+          examViewModel.isLoading && examViewModel.exams.isEmpty
+              ? Expanded(child: Center(child: CircularProgressIndicator()))
+              : Expanded(
+                  // Use Expanded here
+                  child: Container(
+                    color: Colors.blueGrey[50],
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: [
+                          // Search Bar
+                          TextField(
+                            controller: _searchController,
+                            onChanged: (value) {
+                              // If search query is empty, clear search results.
+                              if (value.isEmpty) {
+                                examViewModel.clearSearch();
+                              } else {
+                                // Otherwise, perform search.
+                                examViewModel.searchExams(value);
+                              }
+                            },
+                            decoration: InputDecoration(
+                              labelText: "Search Exams",
+                              prefixIcon: Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              filled: true,
+                              fillColor: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Expanded(
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              itemCount: displayedExams.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == displayedExams.length) {
+                                  return examViewModel.isLoadingMore
+                                      ? Center(
+                                          child: CircularProgressIndicator())
+                                      : SizedBox();
+                                }
+                                final exam = displayedExams[index];
+                                return Card(
+                                  margin: EdgeInsets.symmetric(vertical: 10),
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: ListTile(
+                                    title: Text(
+                                      exam["name"] ?? "",
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    trailing: SizedBox(
+                                      width: 100,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.edit,
+                                                color: Colors.blue),
+                                            onPressed: () async {
+                                              GoRouter.of(context).push(
+                                                '/exams/update/${exam["id"]}/${Uri.encodeComponent(exam["name"] ?? "")}/${exam["examcategory"]}?postid=${exam["postDetails"] ?? ""}&eligibilityid=${exam["eligibilityCriteria"] ?? ""}',
+                                              );
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.delete,
+                                                color: Colors.red),
+                                            onPressed: () async {
+                                              bool success = await examViewModel
+                                                      .deleteExam(
+                                                          exam["id"] ?? "") ??
+                                                  false;
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(success
+                                                        ? "Exam deleted successfully"
+                                                        : "Failed to delete exam")),
+                                              );
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
+        ],
+      ),
     );
   }
 }

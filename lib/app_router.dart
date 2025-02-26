@@ -5,6 +5,7 @@ import 'package:admin_panel/views/add_post.dart';
 import 'package:admin_panel/views/admin_dashboard.dart';
 import 'package:admin_panel/views/category.dart';
 import 'package:admin_panel/views/eligibility_screen.dart';
+import 'package:admin_panel/views/homescreen.dart';
 import 'package:admin_panel/views/login_screen.dart';
 import 'package:admin_panel/views/post_screen.dart';
 import 'package:admin_panel/views/update_category.dart';
@@ -21,6 +22,11 @@ GoRouter getAppRouter(String initialRoute) {
       GoRoute(
         name: 'home',
         path: '/',
+        pageBuilder: (context, state) => MaterialPage(child: Homescreen()),
+      ),
+       GoRoute(
+        name: 'Exam',
+        path: '/exams',
         pageBuilder: (context, state) => MaterialPage(child: AdminDashboard()),
       ),
       GoRoute(

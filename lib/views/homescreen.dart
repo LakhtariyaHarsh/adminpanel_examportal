@@ -313,7 +313,7 @@ class _HomescreenState extends State<Homescreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Card(
                       color: Colors.blueGrey.shade100,
-                      elevation: 5,
+                      elevation: 10,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
                       ),

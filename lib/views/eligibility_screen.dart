@@ -47,6 +47,7 @@ class _EligibilityState extends State<EligibilityScreen> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
+    
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
     // If a search query is active, use the search results; otherwise, show the full list.
     final bool isSearching = _searchQuery.isNotEmpty;

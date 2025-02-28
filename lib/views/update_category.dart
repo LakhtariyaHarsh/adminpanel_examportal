@@ -83,16 +83,14 @@ class _UpdateCategoryState extends State<UpdateCategory> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isMobile = screenWidth < 720;
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(backgroundColor: bluegray,
-          title: Text("Update Category", style: TextStyle(color: white))),
+          title: Center(child: Text("Update Category", style: TextStyle(color: white)))),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

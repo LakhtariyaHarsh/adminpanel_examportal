@@ -170,7 +170,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     return Scaffold(
       appBar: AppBar(
           backgroundColor: bluegray,
-          title: Text("Update Exam", style: TextStyle(color: white))),
+          title: Center(child: Text("Update Exam", style: TextStyle(color: white)))),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

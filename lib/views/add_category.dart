@@ -50,16 +50,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
-    final double screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isMobile = screenWidth < 720;
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
 
     return Scaffold(
       appBar: AppBar(
           backgroundColor: bluegray,
-          title: Text("Add category", style: TextStyle(color: white))),
+          title: Center(child: Text("Add category", style: TextStyle(color: white)))),
       body: SingleChildScrollView(
         child: Center(
           child: Card(

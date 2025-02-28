@@ -82,17 +82,15 @@ class _UpdateEligibilityState extends State<UpdateEligibility> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
+  Widget build(BuildContext context) {;
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isMobile = screenWidth < 720;
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(backgroundColor: bluegray,
-          title: Text("Update Eligibility", style: TextStyle(color: white))),
+          title: Center(child: Text("Update Eligibility", style: TextStyle(color: white)))),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

@@ -51,16 +51,14 @@ class _AddEligibilityState extends State<AddEligibility> {
   @override
   Widget build(BuildContext context) {
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
-    final double screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isMobile = screenWidth < 720;
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
 
     return Scaffold(
       appBar: AppBar(
           backgroundColor: bluegray,
-          title: Text("Add eligibility", style: TextStyle(color: white))),
+          title: Center(child: Text("Add eligibility", style: TextStyle(color: white)))),
       body: SingleChildScrollView(
         child: Center(
           child: Card(

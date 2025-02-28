@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/constant.dart';
 import 'package:admin_panel/view_models/Eligibility_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -53,7 +54,7 @@ class _UpdateEligibilityState extends State<UpdateEligibility> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
-      color: Colors.white,
+      color: white,
       margin: EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: EdgeInsets.all(12),
@@ -73,7 +74,7 @@ class _UpdateEligibilityState extends State<UpdateEligibility> {
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: white,
         ),
         validator: (value) => value!.isEmpty ? "Enter $label" : null,
       ),
@@ -90,8 +91,8 @@ class _UpdateEligibilityState extends State<UpdateEligibility> {
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-          title: Text("Update Eligibility", style: TextStyle(color: Colors.white))),
+      appBar: AppBar(backgroundColor: bluegray,
+          title: Text("Update Eligibility", style: TextStyle(color: white))),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

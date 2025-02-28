@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/constant.dart';
 import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:admin_panel/view_models/Eligibility_view_model.dart';
 import 'package:admin_panel/view_models/post_view_model.dart';
@@ -348,7 +349,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
-      color: Colors.white,
+      color: white,
       margin: EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: EdgeInsets.all(12),
@@ -418,7 +419,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: white,
         ),
         validator: (value) => value!.isEmpty ? "Enter $label" : null,
       ),
@@ -440,7 +441,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: white,
         ),
         validator: isRequired
             ? (value) =>
@@ -468,8 +469,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-          title: Text("Update Exam", style: TextStyle(color: Colors.white))),
+          backgroundColor: bluegray,
+          title: Text("Update Exam", style: TextStyle(color: white))),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -574,7 +575,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                     width: double.infinity,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: white,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: DropdownButtonFormField<String>(
@@ -594,7 +595,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                             ),
                                           ),
                                           filled: true,
-                                          fillColor: Colors.white,
+                                          fillColor: white,
                                         ),
                                         value: selectedCategory,
                                         items: categoryViewModel.categories
@@ -631,7 +632,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                     width: double.infinity,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: white,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: DropdownButtonFormField<String>(
@@ -651,7 +652,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                             ),
                                           ),
                                           filled: true,
-                                          fillColor: Colors.white,
+                                          fillColor: white,
                                         ),
                                         value: selectedPost,
                                         items: postViewModel.posts
@@ -686,7 +687,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                     width: double.infinity,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: white,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: DropdownButtonFormField<String>(
@@ -707,7 +708,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                             ),
                                           ),
                                           filled: true,
-                                          fillColor: Colors.white,
+                                          fillColor: white,
                                         ),
                                         value: selectedeligibilityDetails,
                                         items: eligibilityViewModel

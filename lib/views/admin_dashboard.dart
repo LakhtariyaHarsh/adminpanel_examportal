@@ -1,11 +1,10 @@
+import 'package:admin_panel/constants/constant.dart';
+import 'package:admin_panel/constants/customdrawer.dart';
 import 'package:admin_panel/view_models/exam_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../view_models/auth_view_model.dart';
-import 'add_exam_screen.dart';
-import 'update_exam_screen.dart';
-import 'login_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   @override
@@ -54,271 +53,31 @@ class _AdminDashboardState extends State<AdminDashboard> {
         ? examViewModel.searchResults
         : examViewModel.exams;
     final double screenWidth = MediaQuery.of(context).size.width;
-    bool isMobile = screenWidth < 720;
     bool isDesktop = screenWidth >= 1100;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-        title: Text("ALL EXAMS",
-            style: TextStyle(color: Colors.white)),
-        actions: screenWidth >= 720
-            ? [
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        context.go('/');
-                      },
-                      child:
-                          Text("Home", style: TextStyle(color: Colors.white)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.go('/categories');
-                      },
-                      child: Text("Category",
-                          style: TextStyle(color: Colors.white)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.go('/posts');
-                      },
-                      child:
-                          Text("Posts", style: TextStyle(color: Colors.white)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.go('/eligibilities');
-                      },
-                      child: Text("Eligibility",
-                          style: TextStyle(color: Colors.white)),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.logout, color: Colors.white),
-                      onPressed: () {
-                        authViewModel.logout();
-                        context.go('/login');
-                      },
-                    ),
-                  ],
-                ),
-              ]
-            : null,
+        backgroundColor: bluegray,
+        title: Center(
+          child: Text("ALL EXAMS",
+              style: TextStyle(color: white)),
+        ),
+       
       ),
-      drawer: isMobile
-          ? Drawer(
-              child: Container(
-                color: const Color(0xffe3e4e6),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: DrawerHeader(
-                        decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 244, 245, 246),
-                        ),
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.dashboard,
-                              size: 40,
-                              color: Colors.blueGrey,
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              "ADMIN DASHBOARD",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.school,
-                                color: Colors.blueGrey),
-                            title: const Text("Dashboard"),
-                            onTap: () {
-                              context.go('/');
-                            },
-                          ),
-                          Divider(),
-                          ListTile(
-                                leading: const Icon(Icons.send_and_archive_outlined,
-                                    color: Colors.blueGrey),
-                                title: const Text("Exams"),
-                                onTap: () {
-                                  context.go('/exams');
-                                },
-                              ),
-                              Divider(),
-                          ListTile(
-                            leading: const Icon(Icons.category,
-                                color: Colors.blueGrey),
-                            title: const Text("Category"),
-                            onTap: () {
-                              context.go('/categories');
-                            },
-                          ),
-                          Divider(),
-                          ListTile(
-                            leading: const Icon(Icons.article,
-                                color: Colors.blueGrey),
-                            title: const Text("Posts"),
-                            onTap: () {
-                              context.go('/posts');
-                            },
-                          ),
-                          Divider(),
-                          ListTile(
-                            leading: const Icon(Icons.verified_user,
-                                color: Colors.blueGrey),
-                            title: const Text("Eligibility"),
-                            onTap: () {
-                              context.go('/eligibilities');
-                            },
-                          ),
-                          Divider(),
-                          ListTile(
-                            leading: const Icon(Icons.logout,
-                                color: Colors.blueGrey),
-                            title: const Text("Logout"),
-                            onTap: () {
-                              authViewModel.logout();
-                              context.go('/login');
-                            },
-                          ),
-                          Divider(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          : null,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push('/exams/add');
-        },
-        child: Icon(Icons.add),
-      ),
+      drawer: isDesktop
+          ? null :CustomDrawer(onLogout: () => authViewModel.logout(),),
       body: Row(
         children: [
           //Drawer for desktop
           isDesktop
-              ? Drawer(
-                  child: Container(
-                    color: const Color(0xffe3e4e6),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          child: DrawerHeader(
-                            decoration: const BoxDecoration(
-                              color: Color.fromARGB(255, 244, 245, 246),
-                            ),
-                            child: const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.dashboard,
-                                  size: 40,
-                                  color: Colors.blueGrey,
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  "ADMIN DASHBOARD",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView(
-                            children: [
-                              ListTile(
-                                leading: const Icon(Icons.school,
-                                    color: Colors.blueGrey),
-                                title: const Text("Dashboard"),
-                                onTap: () {
-                                  context.go('/');
-                                },
-                              ),
-                              Divider(),
-                              ListTile(
-                                leading: const Icon(Icons.send_and_archive_outlined,
-                                    color: Colors.blueGrey),
-                                title: const Text("Exams"),
-                                onTap: () {
-                                  context.go('/exams');
-                                },
-                              ),
-                              Divider(),
-                              ListTile(
-                                leading: const Icon(Icons.category,
-                                    color: Colors.blueGrey),
-                                title: const Text("Category"),
-                                onTap: () {
-                                  context.go('/categories');
-                                },
-                              ),
-                              Divider(),
-                              ListTile(
-                                leading: const Icon(Icons.article,
-                                    color: Colors.blueGrey),
-                                title: const Text("Posts"),
-                                onTap: () {
-                                  context.go('/posts');
-                                },
-                              ),
-                              Divider(),
-                              ListTile(
-                                leading: const Icon(Icons.verified_user,
-                                    color: Colors.blueGrey),
-                                title: const Text("Eligibility"),
-                                onTap: () {
-                                  context.go('/eligibilities');
-                                },
-                              ),
-                              Divider(),
-                              ListTile(
-                                leading: const Icon(Icons.logout,
-                                    color: Colors.blueGrey),
-                                title: const Text("Logout"),
-                                onTap: () {
-                                  authViewModel.logout();
-                                  context.go('/login');
-                                },
-                              ),
-                              Divider(),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
+              ? CustomDrawer(onLogout: () => authViewModel.logout(),)
               : SizedBox(),
           examViewModel.isLoading && examViewModel.exams.isEmpty
               ? Expanded(child: Center(child: CircularProgressIndicator()))
               : Expanded(
                   // Use Expanded here
                   child: Container(
-                    color: Colors.blueGrey[50],
+                    color: bluegray50,
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: Column(
@@ -341,7 +100,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10)),
                               filled: true,
-                              fillColor: Colors.white,
+                              fillColor: white,
                             ),
                           ),
                           SizedBox(height: 20),
@@ -385,7 +144,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                           ),
                                           IconButton(
                                             icon: Icon(Icons.delete,
-                                                color: Colors.red),
+                                                color: red),
                                             onPressed: () async {
                                               bool success = await examViewModel
                                                       .deleteExam(

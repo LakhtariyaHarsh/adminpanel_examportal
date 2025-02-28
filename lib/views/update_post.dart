@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/constant.dart';
 import 'package:admin_panel/view_models/Eligibility_view_model.dart';
 import 'package:admin_panel/view_models/post_view_model.dart';
 import 'package:flutter/material.dart';
@@ -120,7 +121,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
-      color: Colors.white,
+      color: white,
       margin: EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: EdgeInsets.all(12),
@@ -144,7 +145,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: white,
         ),
         validator: isRequired
             ? (value) =>
@@ -168,8 +169,8 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-          title: Text("Update Exam", style: TextStyle(color: Colors.white))),
+          backgroundColor: bluegray,
+          title: Text("Update Exam", style: TextStyle(color: white))),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -225,7 +226,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                     width: double.infinity,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: white,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: DropdownButtonFormField<String>(
@@ -246,7 +247,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                             ),
                                           ),
                                           filled: true,
-                                          fillColor: Colors.white,
+                                          fillColor: white,
                                         ),
                                         value: selectedeligibilityDetails,
                                         items: eligibilityViewModel

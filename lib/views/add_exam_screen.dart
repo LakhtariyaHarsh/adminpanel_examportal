@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/constant.dart';
 import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:admin_panel/view_models/Eligibility_view_model.dart';
 import 'package:admin_panel/view_models/post_view_model.dart';
@@ -108,7 +109,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
-      color: Colors.white,
+      color: white,
       margin: EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: EdgeInsets.all(12),
@@ -182,7 +183,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: white,
         ),
         validator: isRequired
             ? (value) =>
@@ -210,8 +211,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-          title: Text("Add Exam", style: TextStyle(color: Colors.white))),
+          backgroundColor: bluegray,
+          title: Text("Add Exam", style: TextStyle(color: white))),
       body: SingleChildScrollView(
         child: Center(
           child: Card(
@@ -271,7 +272,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                               width: double.infinity,
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: white,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: DropdownButtonFormField<String>(
@@ -289,7 +290,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                       ),
                                     ),
                                     filled: true,
-                                    fillColor: Colors.white,
+                                    fillColor: white,
                                   ),
                                   value: selectedCategory,
                                   items: categoryViewModel.categories
@@ -325,7 +326,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                               width: double.infinity,
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: white,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: DropdownButtonFormField<String>(
@@ -343,7 +344,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                       ),
                                     ),
                                     filled: true,
-                                    fillColor: Colors.white,
+                                    fillColor: white,
                                   ),
                                   value: selectedPost,
                                   items: postViewModel.posts
@@ -377,7 +378,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                               width: double.infinity,
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: white,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: DropdownButtonFormField<String>(
@@ -395,7 +396,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                       ),
                                     ),
                                     filled: true,
-                                    fillColor: Colors.white,
+                                    fillColor: white,
                                   ),
                                   value: selectedeligibilityDetails,
                                   items: eligibilityViewModel.eligibilities

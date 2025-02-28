@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +14,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  
+
   bool _isLoading = true;
 
   @override
@@ -42,70 +43,123 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
-       final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
+    bool isMobile = screenWidth < 720;
+    bool isTablet = screenWidth < 1100;
 
     return Scaffold(
-      body: Center(
-        child: _isLoading
-            ? CircularProgressIndicator() // ✅ Show loading indicator while checking token
-            : Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: SizedBox(
-                  width: screenWidth >= 1024 ? screenWidth * 0.3: screenWidth * 0.9,
+      body: Stack(children: <Widget>[
+        // Fullscreen Background Image
+        Positioned.fill(
+          child: Image.asset(
+            'assets/images/webdesign.jpg', // Background image
+            fit: BoxFit.cover,
+          ),
+        ),
+        Container(
+          color: Colors.black.withOpacity(0.5), // Adjust overlay opacity
+        ),
+        Center(
+          child: _isLoading
+              ? CircularProgressIndicator() // ✅ Show loading indicator while checking token
+              : SizedBox(
+                  width: screenWidth >= 1024
+                      ? screenWidth * 0.7
+                      : screenWidth * 0.9,
                   child: Card(
-                    color: Colors.blueGrey.shade50,
+                    color: bluegray100,
                     elevation: 5,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                      padding: EdgeInsets.symmetric(
+                          vertical: isMobile
+                              ? 20
+                              : isTablet
+                                  ? 50
+                                  : 100,
+                          horizontal: 20),
+                      child: Row(
                         children: [
-                          Icon(Icons.lock_outline, size: 80, color: Colors.blueGrey),
-                          SizedBox(height: 20),
-                          Text(
-                            "Admin Login",
-                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          isMobile
+                              ? SizedBox()
+                              : Expanded(
+                                  child:
+                                      Image.asset("assets/images/login.png")),
+                          SizedBox(
+                            width: isMobile ? 0 : 20,
                           ),
-                          SizedBox(height: 20),
-                          _buildTextField(emailController, "Email", Icons.email, false),
-                          SizedBox(height: 10),
-                          _buildTextField(passwordController, "Password", Icons.lock, true),
-                          SizedBox(height: 20),
-                          authViewModel.isLoading
-                              ? CircularProgressIndicator()
-                              : SizedBox(
-                                  width: 200,
-                                  child: ElevatedButton(
-                                    onPressed: _handleLogin,
-                                    style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(vertical: 14),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),                           
-                                      ),
+                          Expanded(
+                            child: Container(
+                              color: white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.lock_outline,
+                                        size: 80, color: black),
+                                    SizedBox(height: 20),
+                                    Text(
+                                      "Admin Login",
+                                      style: TextStyle(
+                                          fontSize: 22,
+                                          color: red,
+                                          fontWeight: FontWeight.bold),
                                     ),
-                                    child: Text("Login", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                  ),
+                                    SizedBox(height: 20),
+                                    _buildTextField(emailController, "Email",
+                                        Icons.email, false),
+                                    SizedBox(height: 10),
+                                    _buildTextField(passwordController,
+                                        "Password", Icons.lock, true),
+                                    SizedBox(height: 20),
+                                    authViewModel.isLoading
+                                        ? CircularProgressIndicator()
+                                        : SizedBox(
+                                            width: 200,
+                                            child: ElevatedButton(
+                                              onPressed: _handleLogin,
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.red,
+                                                minimumSize:
+                                                    const Size(130, 50),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.zero,
+                                                ),
+                                              ),
+                                              child: Text("Login",
+                                                  style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: white,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ),
+                                          ),
+                                  ],
                                 ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ),
-      ),
+        ),
+      ]),
     );
   }
 
-  Widget _buildTextField(
-      TextEditingController controller, String label, IconData icon, bool isPassword) {
+  Widget _buildTextField(TextEditingController controller, String label,
+      IconData icon, bool isPassword) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: Colors.blueGrey),
+        prefixIcon: Icon(icon, color: bluegrey),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
       obscureText: isPassword,

@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/constant.dart';
 import 'package:admin_panel/view_models/post_view_model.dart';
 import 'package:admin_panel/view_models/Eligibility_view_model.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
-      color: Colors.white,
+      color: white,
       margin: EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: EdgeInsets.all(12),
@@ -52,7 +53,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: white,
         ),
         validator: isRequired
             ? (value) =>
@@ -66,16 +67,14 @@ class _AddPostScreenState extends State<AddPostScreen> {
   Widget build(BuildContext context) {
     final postViewModel = Provider.of<PostViewModel>(context, listen: false);
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
-    final double screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isMobile = screenWidth < 720;
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
 
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-          title: Text("Add Post", style: TextStyle(color: Colors.white))),
+          backgroundColor: bluegray,
+          title: Text("Add Post", style: TextStyle(color: white))),
       body: SingleChildScrollView(
         child: Center(
           child: Card(
@@ -116,7 +115,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                               width: double.infinity,
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: white,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: DropdownButtonFormField<String>(
@@ -134,7 +133,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                       ),
                                     ),
                                     filled: true,
-                                    fillColor: Colors.white,
+                                    fillColor: white,
                                   ),
                                   value: selectedeligibilityDetails,
                                   items: eligibilityViewModel.eligibilities

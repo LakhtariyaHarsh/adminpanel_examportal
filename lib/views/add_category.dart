@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/constant.dart';
 import 'package:admin_panel/view_models/Category_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -19,7 +20,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
-      color: Colors.white,
+      color: white,
       margin: EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: EdgeInsets.all(12),
@@ -39,7 +40,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: white,
         ),
         validator: (value) => value!.isEmpty ? "Enter $label" : null,
       ),
@@ -57,8 +58,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 146, 156, 160),
-          title: Text("Add category", style: TextStyle(color: Colors.white))),
+          backgroundColor: bluegray,
+          title: Text("Add category", style: TextStyle(color: white))),
       body: SingleChildScrollView(
         child: Center(
           child: Card(

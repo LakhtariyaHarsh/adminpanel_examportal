@@ -111,7 +111,7 @@ class CustomDrawer extends StatelessWidget {
           if (isLogout) {
             onLogout();
           }
-          navigateTo(context, route);
+           context.go(route);
         },
       ),
     );

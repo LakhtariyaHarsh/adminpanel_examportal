@@ -33,6 +33,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
       TextEditingController();
   late TextEditingController organizationNameController =
       TextEditingController();
+  late TextEditingController dashboardNameController = TextEditingController();
+  late TextEditingController tileNameNameController = TextEditingController();
   late TextEditingController fullNameOfExamController = TextEditingController();
   late TextEditingController advertisementNoController =
       TextEditingController();
@@ -76,6 +78,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   DateTime? answerKeyAvailable;
   DateTime? syllabusAvailableDate;
   DateTime? resultPostingDate;
+  DateTime? certificateVerificationAvailable;
+  DateTime? important;
   DateTime? examDate;
   DateTime? ageFrom;
   DateTime? ageUpto;
@@ -97,6 +101,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   bool isanswerKeyAvailable = false;
   bool syllabusAvailable = false;
   bool resultAvailable = false;
+  bool iscertificateVerificationAvailable = false;
+  bool isImportant = false;
   bool multiPost = false;
   bool shortNotice = false;
   bool downloadBroucher = false;
@@ -225,6 +231,10 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
             text: exam["shortInformation"]?.toString() ?? '');
         organizationNameController = TextEditingController(
             text: exam["organizationName"]?.toString() ?? '');
+        dashboardNameController = TextEditingController(
+            text: exam["DashboardName"]?.toString() ?? '');
+        tileNameNameController =
+            TextEditingController(text: exam["tileName"]?.toString() ?? '');
         fullNameOfExamController = TextEditingController(
             text: exam["fullNameOfExam"]?.toString() ?? '');
         advertisementNoController = TextEditingController(
@@ -292,6 +302,13 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
         resultPostingDate = exam["resultPostingDate"] != null
             ? DateTime.parse(exam["resultPostingDate"])
             : null;
+        certificateVerificationAvailable =
+            exam["certificateVerificationAvailable"] != null
+                ? DateTime.parse(exam["certificateVerificationAvailable"])
+                : null;
+        important = exam["important"] != null
+            ? DateTime.parse(exam["important"])
+            : null;
         examDate =
             exam["examDate"] != null ? DateTime.parse(exam["examDate"]) : null;
         ageFrom =
@@ -320,6 +337,9 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
         isanswerKeyAvailable = exam["isanswerKeyAvailable"] ?? false;
         syllabusAvailable = exam["syllabusAvailable"] ?? false;
         resultAvailable = exam["resultAvailable"] ?? false;
+        iscertificateVerificationAvailable =
+            exam["iscertificateVerificationAvailable"] ?? false;
+        isImportant = exam["isImportant"] ?? false;
         multiPost = exam["multiPost"] ?? false;
         shortNotice = exam["shortNotice"] ?? false;
         downloadBroucher = exam["downloadBroucher"] ?? false;
@@ -468,7 +488,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     return Scaffold(
       appBar: AppBar(
           backgroundColor: bluegray,
-          title: Center(child: Text("Update Exam", style: TextStyle(color: white)))),
+          title: Center(
+              child: Text("Update Exam", style: TextStyle(color: white)))),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -502,6 +523,10 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                             _buildTextFieldWithValidation(
                                 organizationNameController,
                                 "Organization Name"),
+                            _buildTextFieldWithValidation(
+                                dashboardNameController, "Dashboard Name"),
+                            _buildTextFieldWithValidation(
+                                tileNameNameController, "Tile Name"),
                             _buildTextFieldWithValidation(
                                 fullNameOfExamController, "Full Name Of Exam"),
                             _buildTextFieldWithValidation(
@@ -793,6 +818,20 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                 (val) => setState(() => resultAvailable = val),
                                 (date) =>
                                     setState(() => resultPostingDate = date)),
+                            _buildCheckboxWithDate(
+                                "certificateVerification Available",
+                                iscertificateVerificationAvailable,
+                                certificateVerificationAvailable,
+                                (val) => setState(() =>
+                                    iscertificateVerificationAvailable = val),
+                                (date) => setState(() =>
+                                    certificateVerificationAvailable = date)),
+                            _buildCheckboxWithDate(
+                                "Important Available",
+                                isImportant,
+                                important,
+                                (val) => setState(() => isImportant = val),
+                                (date) => setState(() => important = date)),
 
                             // Additional Date Pickers for optional fields
                             _buildDatePicker(
@@ -887,6 +926,9 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                         shortInformationController.text,
                                     "organizationName":
                                         organizationNameController.text,
+                                    "DashboardName":
+                                        dashboardNameController.text,
+                                    "tileName": tileNameNameController.text,
                                     "fullNameOfExam":
                                         fullNameOfExamController.text,
                                     "advertisementNo":
@@ -912,6 +954,13 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                     "answerKeyAvailableEdit":
                                         answerKeyAvailableEdit
                                             ?.toIso8601String(),
+                                    "iscertificateVerificationAvailable":
+                                        iscertificateVerificationAvailable,
+                                    "certificateVerificationAvailable":
+                                        certificateVerificationAvailable
+                                            ?.toIso8601String(),
+                                    "isImportant": isImportant,
+                                    "important": important?.toIso8601String(),
                                     "generalCategoryFee": parseNullableInt(
                                         generalCategoryFeeController.text),
                                     "obcCategoryFee": parseNullableInt(

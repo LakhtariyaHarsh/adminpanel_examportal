@@ -63,6 +63,17 @@ class _AddExamScreenState extends State<AddExamScreen> {
   final TextEditingController womenCategoryFeeController =
       TextEditingController();
 
+  List<Map<String, dynamic>> postDetails = [];
+  List<Map<String, TextEditingController>> postControllers = [];
+
+  final TextEditingController postNameController = TextEditingController();
+  final TextEditingController totalPostController = TextEditingController();
+  final TextEditingController generalPostController = TextEditingController();
+  final TextEditingController obcPostController = TextEditingController();
+  final TextEditingController ewsPostController = TextEditingController();
+  final TextEditingController scPostController = TextEditingController();
+  final TextEditingController stPostController = TextEditingController();
+
   // Date fields
   DateTime? applicationBegin;
   DateTime? lastDateToApply;
@@ -83,7 +94,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
   DateTime? jobPostingDate;
 
   String? selectedCategory;
-  String? selectedPost;
   String? selectedeligibilityDetails;
 
   bool isAdmitCardAvailable = false;
@@ -200,6 +210,48 @@ class _AddExamScreenState extends State<AddExamScreen> {
     );
   }
 
+  void _addPostField() {
+    setState(() {
+      postControllers.add({
+        "Postname": TextEditingController(),
+        "TotalPost": TextEditingController(),
+        "GeneralPost": TextEditingController(),
+        "OBCPost": TextEditingController(),
+        "EWSPost": TextEditingController(),
+        "SCPost": TextEditingController(),
+        "STPost": TextEditingController(),
+      });
+    });
+  }
+
+  void _savePost(int index) {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        postDetails.add({
+          "postName": postControllers[index]["Postname"]!.text,
+          "totalPost": postControllers[index]["TotalPost"]!.text,
+          "generalPost": postControllers[index]["GeneralPost"]!.text,
+          "obcPost": postControllers[index]["OBCPost"]!.text,
+          "ewsPost": postControllers[index]["EWSPost"]!.text,
+          "scPost": postControllers[index]["SCPost"]!.text,
+          "stPost": postControllers[index]["STPost"]!.text,
+          "eligibilityDetails": selectedeligibilityDetails,
+        });
+        print("eligibility...............................................................................");
+        print(selectedeligibilityDetails);
+      });
+      
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Post added successfully!")));
+    }
+  }
+
+  void _deletePost(int index) {
+    setState(() {
+      postControllers.removeAt(index);
+    });
+  }
+
   int? parseNullableInt(String text) {
     return text.trim().isEmpty ? null : int.tryParse(text);
   }
@@ -211,7 +263,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
     bool isDesktop = screenWidth >= 1024;
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
-    final postViewModel = Provider.of<PostViewModel>(context);
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
 
     return Scaffold(
@@ -364,111 +415,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
                         ),
                       ),
 
-                      _styledCard(
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: white,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: DropdownButtonFormField<String>(
-                                  isExpanded: true,
-                                  decoration: InputDecoration(
-                                    hintText: "Select PostName",
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(
-                                        color: Colors.blue,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    filled: true,
-                                    fillColor: white,
-                                  ),
-                                  value: selectedPost,
-                                  items: postViewModel.posts
-                                      .map((post) => DropdownMenuItem(
-                                            value: post["id"] as String,
-                                            child: Text(
-                                              post["name"] as String,
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 3,
-                                            ),
-                                          ))
-                                      .toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedPost = value;
-                                    });
-                                    print("Selected post: $selectedPost");
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      _styledCard(
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: white,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: DropdownButtonFormField<String>(
-                                  isExpanded: true,
-                                  decoration: InputDecoration(
-                                    hintText: "Select Eligibility Details",
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(
-                                        color: Colors.blue,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    filled: true,
-                                    fillColor: white,
-                                  ),
-                                  value: selectedeligibilityDetails,
-                                  items: eligibilityViewModel.eligibilities
-                                      .map((eligibility) => DropdownMenuItem(
-                                            value: eligibility["id"] as String,
-                                            child: Text(
-                                              eligibility["name"] as String,
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 3,
-                                            ),
-                                          ))
-                                      .toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedeligibilityDetails = value;
-                                    });
-                                    print(
-                                        "Selected Category: $selectedeligibilityDetails");
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
                       // Date Pickers
                       _buildDatePicker("Application Begin", applicationBegin,
                           (date) => setState(() => applicationBegin = date)),
@@ -593,6 +539,101 @@ class _AddExamScreenState extends State<AddExamScreen> {
                         ),
                       ),
 
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _addPostField,
+                        child: Text("+ Add Posts"),
+                      ),
+                      SizedBox(height: 10),
+
+                      ...List.generate(postControllers.length, (index) {
+                        return _styledCard(
+                          Column(
+                            children: [
+                              _buildTextFieldWithValidation(
+                                  postControllers[index]["Postname"]!,
+                                  "Post Name",
+                                  isRequired: true),
+                              _buildTextFieldWithValidation(
+                                  postControllers[index]["TotalPost"]!,
+                                  "Total Post"),
+                              _buildTextFieldWithValidation(
+                                  postControllers[index]["GeneralPost"]!,
+                                  "General Post",
+                                  isNumber: true),
+                              _buildTextFieldWithValidation(
+                                  postControllers[index]["OBCPost"]!,
+                                  "OBC Post",
+                                  isNumber: true),
+                              _buildTextFieldWithValidation(
+                                  postControllers[index]["EWSPost"]!,
+                                  "EWS Post",
+                                  isNumber: true),
+                              _buildTextFieldWithValidation(
+                                  postControllers[index]["SCPost"]!, "SC Post",
+                                  isNumber: true),
+                              _buildTextFieldWithValidation(
+                                  postControllers[index]["STPost"]!, "ST Post",
+                                  isNumber: true),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              DropdownButtonFormField<String>(
+                                decoration: InputDecoration(
+                                  hintText: "Select Eligibility Details",
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8)),
+                                  filled: true,
+                                  fillColor: white,
+                                ),
+                                value: selectedeligibilityDetails,
+                                items: eligibilityViewModel.eligibilities
+                                    .map((eligibility) => DropdownMenuItem(
+                                          value: eligibility["id"] as String,
+                                          child: Text(
+                                              eligibility["name"] as String),
+                                        ))
+                                    .toList(),
+                                onChanged: (value) => setState(
+                                    () => selectedeligibilityDetails = value),
+                                validator: (value) => value == null
+                                    ? "Please select a eligibility"
+                                    : null, // Validation
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      _savePost(index);
+                                      if (Navigator.canPop(context)) {
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: Text("Save"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      _deletePost(index);
+                                      if (Navigator.canPop(context)) {
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: Text("Delete"),
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+
                       // Submit Button
                       SizedBox(height: 20),
                       ElevatedButton(
@@ -655,7 +696,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
                               "ageFrom": ageFrom?.toIso8601String(),
                               "ageUpto": ageUpto?.toIso8601String(),
                               "multiPost": multiPost,
-                              "postDetails": selectedPost,
+                              "postDetails":
+                                  postDetails, // Storing multiple posts
                               "applyOnline": applyOnlineController.text,
                               "shortNotice": shortNotice,
                               "downloadShortNotice":

@@ -64,7 +64,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
       TextEditingController();
 
   List<Map<String, dynamic>> postDetails = [];
-  List<Map<String, TextEditingController>> postControllers = [];
+  List<Map<String, dynamic>> postControllers = [];
 
   final TextEditingController postNameController = TextEditingController();
   final TextEditingController totalPostController = TextEditingController();
@@ -211,6 +211,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
   }
 
   void _addPostField() {
+    final eligibilityViewModel =
+        Provider.of<EligibilityViewModel>(context, listen: false);
     setState(() {
       postControllers.add({
         "Postname": TextEditingController(),
@@ -220,6 +222,9 @@ class _AddExamScreenState extends State<AddExamScreen> {
         "EWSPost": TextEditingController(),
         "SCPost": TextEditingController(),
         "STPost": TextEditingController(),
+        "EligibilityDetails": eligibilityViewModel.eligibilities.isNotEmpty
+            ? eligibilityViewModel.eligibilities.first["id"] as String?
+            : null, // Store as String, not TextEditingController
       });
     });
   }
@@ -235,14 +240,17 @@ class _AddExamScreenState extends State<AddExamScreen> {
           "ewsPost": postControllers[index]["EWSPost"]!.text,
           "scPost": postControllers[index]["SCPost"]!.text,
           "stPost": postControllers[index]["STPost"]!.text,
-          "eligibilityDetails": selectedeligibilityDetails,
+          "eligibilityDetails":
+              postControllers[index]["EligibilityDetails"] ?? "",
         });
-        print("eligibility...............................................................................");
-        print(selectedeligibilityDetails);
+
+        print(
+            "Saved eligibilityDetails for index $index: ${postControllers[index]["EligibilityDetails"]}");
       });
-      
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Post added successfully!")));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Post added successfully!")),
+      );
     }
   }
 
@@ -586,19 +594,26 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                   filled: true,
                                   fillColor: white,
                                 ),
-                                value: selectedeligibilityDetails,
+                                value: postControllers[index]
+                                    ["EligibilityDetails"], // Use as String
                                 items: eligibilityViewModel.eligibilities
-                                    .map((eligibility) => DropdownMenuItem(
-                                          value: eligibility["id"] as String,
-                                          child: Text(
-                                              eligibility["name"] as String),
-                                        ))
-                                    .toList(),
-                                onChanged: (value) => setState(
-                                    () => selectedeligibilityDetails = value),
+                                    .map((eligibility) {
+                                  return DropdownMenuItem(
+                                    value: eligibility["id"] as String,
+                                    child: Text(eligibility["name"] as String),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    postControllers[index]
+                                        ["EligibilityDetails"] = value;
+                                    print(
+                                        "Updated eligibilityDetails for index $index: $value"); // Debugging
+                                  });
+                                },
                                 validator: (value) => value == null
-                                    ? "Please select a eligibility"
-                                    : null, // Validation
+                                    ? "Please select eligibility"
+                                    : null,
                               ),
                               SizedBox(
                                 height: 20,
@@ -705,7 +720,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
                               "downloadNotification":
                                   downloadNotificationController.text,
                               "officialWebsite": officialWebsiteController.text,
-                              "eligibilityCriteria": selectedeligibilityDetails,
                               "downloadBroucher": downloadBroucher,
                               "broucherLink": broucherLinkController.text,
                               "syllabusAvailable": syllabusAvailable,

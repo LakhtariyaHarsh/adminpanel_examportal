@@ -240,7 +240,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
           "ewsPost": postControllers[index]["EWSPost"]!.text,
           "scPost": postControllers[index]["SCPost"]!.text,
           "stPost": postControllers[index]["STPost"]!.text,
-          "eligibilityDetails":
+          "eligiblityDetails":
               postControllers[index]["EligibilityDetails"] ?? "",
         });
 
@@ -275,9 +275,23 @@ class _AddExamScreenState extends State<AddExamScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: bluegray,
-          title:
-              Center(child: Text("Add Exam", style: TextStyle(color: white)))),
+        backgroundColor: bluegray,
+        title: Center(
+          child: Text(
+            "Add Exam",
+            style: TextStyle(color: white),
+          ),
+        ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                print("These is the Post ........................");
+                print(postDetails.length);
+                print(postDetails.first);
+              },
+              icon: Icon(Icons.abc))
+        ],
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Card(

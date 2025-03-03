@@ -144,6 +144,8 @@ class ExamViewModel extends ChangeNotifier {
   /// 🔹 Add a New Exam
   Future<void> addExam(Map<String, dynamic> examData) async {
     try {
+      print(examData);
+      print("These is Exam Data");
       await _examService.addExam(examData);
       await fetchExams(); // Refresh list after adding
     } catch (e) {

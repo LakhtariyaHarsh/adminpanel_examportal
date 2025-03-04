@@ -44,18 +44,19 @@ class CustomDrawer extends StatelessWidget {
       ...menuItems.entries.map((entry) {
         return _buildExpandableMenu(context, entry.key, entry.value);
       }).toList(),
-      _buildDrawerItem(context, Icons.logout, "Logout", "/login", isLogout: true),
+      _buildDrawerItem(context, Icons.logout, "Logout", "/login",
+          isLogout: true),
     ];
 
     return Drawer(
       child: Container(
-        color: bluegray50,
+        color: white, // Change drawer body color to white
         child: Column(
           children: [
             SizedBox(
               width: double.infinity,
               child: DrawerHeader(
-                decoration: const BoxDecoration(color: Color(0xfff4f5f6)),
+                decoration: const BoxDecoration(color: white),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
@@ -83,19 +84,24 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildExpandableMenu(BuildContext context, String title, List<Map<String, String>> items) {
+  Widget _buildExpandableMenu(
+      BuildContext context, String title, List<Map<String, String>> items) {
     return ExpansionTile(
       leading: _getIcon(title),
       title: Text(title),
       children: items.map((item) {
-        return _buildDrawerItem(context, Icons.circle, item["title"]!, item["route"]!);
+        return _buildDrawerItem(
+            context, Icons.circle, item["title"]!, item["route"]!);
       }).toList(),
     );
   }
 
-  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, String route,
+  Widget _buildDrawerItem(
+      BuildContext context, IconData icon, String title, String route,
       {bool isLogout = false}) {
-    bool isSelected = GoRouter.of(context).routerDelegate.currentConfiguration.fullPath == route;
+    bool isSelected =
+        GoRouter.of(context).routerDelegate.currentConfiguration.fullPath ==
+            route;
     return Container(
       color: isSelected ? bluegray : Colors.transparent,
       child: ListTile(
@@ -111,7 +117,7 @@ class CustomDrawer extends StatelessWidget {
           if (isLogout) {
             onLogout();
           }
-           context.go(route);
+          context.go(route);
         },
       ),
     );

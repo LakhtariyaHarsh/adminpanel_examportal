@@ -28,7 +28,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   final _formKey = GlobalKey<FormState>();
 
   List<Map<String, dynamic>> postDetails = [];
-  List<Map<String, TextEditingController>> postControllers = [];
+  List<Map<String, dynamic>> postControllers = [];
 
   // Controllers for text fields
   late TextEditingController nameController;
@@ -94,11 +94,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
 
   // Selected category id and name
   String? selectedCategory;
-  String? selectedPost;
   String? selectedeligibilityDetails;
-  String? selectedCategoryName;
-  String? selectedPostName;
-  String? selectedEligibilityDetailsName;
 
   bool isadmitCardAvailable = false;
   bool isanswerKeyAvailable = false;
@@ -124,9 +120,6 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
       setState(() {
         isLoading = true;
       });
-      await fetchCategoryData();
-      await fetchPostData();
-      await fetchEligibilityData();
       await fetchExamData();
       setState(() {
         isLoading = false;
@@ -136,56 +129,6 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
         isLoading = false;
       });
       print("Initialization error: $e");
-    }
-  }
-
-  // Fetch category data by widget.categoryid and store its name.
-  Future<void> fetchCategoryData() async {
-    final categoryViewModel =
-        Provider.of<CategoryViewModel>(context, listen: false);
-    final category =
-        await categoryViewModel.fetchCategoryById(widget.categoryid);
-    // Expecting category to be a map with "categoryName" key.
-    if (category != null) {
-      setState(() {
-        selectedCategoryName = category["categoryName"]?.toString() ?? '';
-      });
-      print("Selected Category: $selectedCategoryName");
-    } else {
-      print("No category found for id: ${widget.categoryid}");
-    }
-  }
-
-  // Fetch post data by widget.postid and store its name.
-  Future<void> fetchPostData() async {
-    final postViewModel = Provider.of<PostViewModel>(context, listen: false);
-    final post = await postViewModel.fetchPostById(widget.postid);
-    // Expecting category to be a map with "categoryName" key.
-    if (post != null) {
-      setState(() {
-        selectedPostName = post["postName"]?.toString() ?? '';
-      });
-      print("Selected post: $selectedPostName");
-    } else {
-      print("No category found for id: ${widget.postid}");
-    }
-  }
-
-  // Fetch category data by widget.categoryid and store its name.
-  Future<void> fetchEligibilityData() async {
-    final eligibilityViewModel =
-        Provider.of<EligibilityViewModel>(context, listen: false);
-    final eligibility =
-        await eligibilityViewModel.fetchEligibilityById(widget.eligibilityid);
-    // Expecting category to be a map with "categoryName" key.
-    if (eligibility != null) {
-      setState(() {
-        selectedEligibilityDetailsName =
-            eligibility["eligiblityCriteria"]?.toString() ?? '';
-      });
-      print("Selected eligibility: $selectedEligibilityDetailsName");
-    } else {
-      print("No eligibility found for id: ${widget.eligibilityid}");
     }
   }
 
@@ -203,17 +146,13 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
           selectedCategory = exam["examCategory"] is Map
               ? exam["examCategory"]["_id"].toString()
               : exam["examCategory"].toString();
-          // Optionally, if exam data contains category name (for instance, exam["categoryName"]), use that:
-          if (exam["categoryName"] != null) {
-            selectedCategoryName = exam["categoryName"].toString();
-          }
         }
 
         if (exam["postDetails"] != null) {
-          postDetails = List<Map<String, dynamic>>.from(exam["postDetails"]);
-          postControllers = postDetails.map((post) {
+          postControllers =
+              List<Map<String, dynamic>>.from(exam["postDetails"]).map((post) {
             return {
-              "Postname": TextEditingController(text: post["postName"]),
+              "Postname": TextEditingController(text: post["postName"] ?? ""),
               "TotalPost": TextEditingController(
                   text: post["totalPost"]?.toString() ?? ''),
               "GeneralPost": TextEditingController(
@@ -226,21 +165,18 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                   TextEditingController(text: post["scPost"]?.toString() ?? ''),
               "STPost":
                   TextEditingController(text: post["stPost"]?.toString() ?? ''),
-              "eligibilityDetails":
-                  TextEditingController(text: post["eligibilityDetails"] ?? ''),
+              "eligibilityDetails": post["eligiblityDetails"] is Map
+                  ? (post["eligiblityDetails"]["\$oid"] ??
+                          post["eligiblityDetails"]["_id"])
+                      .toString()
+                  : post["eligiblityDetails"]?.toString() ?? "",
             };
           }).toList();
         }
 
-        if (exam["eligibilityCriteria"] != null) {
-          selectedeligibilityDetails = exam["eligibilityCriteria"] is Map
-              ? exam["eligibilityCriteria"]["_id"].toString()
-              : exam["eligibilityCriteria"].toString();
-          // Optionally, if exam data contains category name (for instance, exam["categoryName"]), use that:
-          if (exam["eligiblityCriteria"] != null) {
-            selectedEligibilityDetailsName =
-                exam["eligiblityCriteria"].toString();
-          }
+        for (var i = 0; i < postControllers.length; i++) {
+          print(
+              "Post $i - Eligibility ID: ${postControllers[i]["eligibilityDetails"]}");
         }
 
         shortInformationController = TextEditingController(
@@ -367,6 +303,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   }
 
   void _addPostField() {
+    final eligibilityViewModel =
+        Provider.of<EligibilityViewModel>(context, listen: false);
     setState(() {
       postControllers.add({
         "Postname": TextEditingController(),
@@ -376,8 +314,9 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
         "EWSPost": TextEditingController(),
         "SCPost": TextEditingController(),
         "STPost": TextEditingController(),
-        "eligibilityDetails":
-            TextEditingController(text: selectedeligibilityDetails ?? ''),
+        "eligibilityDetails": eligibilityViewModel.eligibilities.isNotEmpty
+            ? eligibilityViewModel.eligibilities.first["id"] as String?
+            : "", // ✅ Set default or empty string
       });
     });
   }
@@ -393,10 +332,12 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
           "ewsPost": postControllers[index]["EWSPost"]!.text,
           "scPost": postControllers[index]["SCPost"]!.text,
           "stPost": postControllers[index]["STPost"]!.text,
-          "eligibilityDetails":
-              postControllers[index]["eligibilityDetails"]!.text,
+          "eligibilityDetails": postControllers[index]["EligibilityDetails"] ??
+              "", // ✅ Store as String
         };
       });
+      print(
+          "Saved eligibilityDetails for index $index: ${postControllers[index]["EligibilityDetails"]}");
 
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Post updated successfully!")));
@@ -906,21 +847,26 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                         filled: true,
                                         fillColor: white,
                                       ),
-                                      value: selectedeligibilityDetails,
+                                      value: postControllers[index][
+                                          "eligibilityDetails"], // ✅ Ensure correct String format
                                       items: eligibilityViewModel.eligibilities
-                                          .map((eligibility) =>
-                                              DropdownMenuItem(
-                                                value:
-                                                    eligibility["id"] as String,
-                                                child: Text(eligibility["name"]
-                                                    as String),
-                                              ))
-                                          .toList(),
-                                      onChanged: (value) => setState(() =>
-                                          selectedeligibilityDetails = value),
+                                          .map((eligibility) {
+                                        return DropdownMenuItem(
+                                          value: eligibility["id"] as String,
+                                          child: Text(
+                                              eligibility["name"] as String),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          postControllers[index]
+                                                  ["eligibilityDetails"] =
+                                              value; // ✅ Store the correct eligibility ID
+                                        });
+                                      },
                                       validator: (value) => value == null
-                                          ? "Please select a eligibility"
-                                          : null, // Validation
+                                          ? "Please select eligibility"
+                                          : null,
                                     ),
                                     SizedBox(
                                       height: 20,
@@ -1034,8 +980,6 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                         downloadNotificationController.text,
                                     "officialWebsite":
                                         officialWebsiteController.text,
-                                    "eligibilityCriteria":
-                                        selectedeligibilityDetails,
                                     "downloadBroucher": downloadBroucher,
                                     "broucherLink": broucherLinkController.text,
                                     "syllabusAvailable": syllabusAvailable,

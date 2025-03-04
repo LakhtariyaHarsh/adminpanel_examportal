@@ -562,12 +562,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
                       ),
 
                       SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _addPostField,
-                        child: Text("+ Add Posts"),
-                      ),
-                      SizedBox(height: 10),
-
                       ...List.generate(postControllers.length, (index) {
                         return _styledCard(
                           Column(
@@ -662,6 +656,11 @@ class _AddExamScreenState extends State<AddExamScreen> {
                           ),
                         );
                       }),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _addPostField,
+                        child: Text("+ Add Posts"),
+                      ),
 
                       // Submit Button
                       SizedBox(height: 20),

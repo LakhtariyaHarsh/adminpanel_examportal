@@ -148,10 +148,14 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
               : exam["examCategory"].toString();
         }
 
-        if (exam["postDetails"] != null) {
-          postControllers =
-              List<Map<String, dynamic>>.from(exam["postDetails"]).map((post) {
-            return {
+        // Ensure postControllers and postDetails are populated correctly
+        if (exam["postDetails"] != null &&
+            (exam["postDetails"] as List).isNotEmpty) {
+          postControllers = [];
+          postDetails = []; // ✅ Prevents empty list issue
+
+          for (var post in exam["postDetails"]) {
+            postControllers.add({
               "Postname": TextEditingController(text: post["postName"] ?? ""),
               "TotalPost": TextEditingController(
                   text: post["totalPost"]?.toString() ?? ''),
@@ -165,18 +169,39 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                   TextEditingController(text: post["scPost"]?.toString() ?? ''),
               "STPost":
                   TextEditingController(text: post["stPost"]?.toString() ?? ''),
-              "eligibilityDetails": post["eligiblityDetails"] is Map
-                  ? (post["eligiblityDetails"]["\$oid"] ??
-                          post["eligiblityDetails"]["_id"])
-                      .toString()
-                  : post["eligiblityDetails"]?.toString() ?? "",
-            };
-          }).toList();
+              "eligibilityDetails": post["eligibilityDetails"] is Map
+                  ? post["eligibilityDetails"]["_id"].toString()
+                  : post["eligibilityDetails"].toString(),
+            });
+
+            // ✅ Populate postDetails correctly to avoid empty array issue
+            postDetails.add({
+              "postName": post["postName"] ?? "",
+              "totalPost": post["totalPost"]?.toString() ?? '',
+              "generalPost": post["generalPost"]?.toString() ?? '',
+              "obcPost": post["obcPost"]?.toString() ?? '',
+              "ewsPost": post["ewsPost"]?.toString() ?? '',
+              "scPost": post["scPost"]?.toString() ?? '',
+              "stPost": post["stPost"]?.toString() ?? '',
+              "eligibilityDetails": post["eligibilityDetails"] is Map
+                  ? post["eligibilityDetails"]["_id"].toString()
+                  : post["eligibilityDetails"].toString(),
+            });
+          }
         }
+
+        print(
+            "✅ Loaded ${postDetails.length} postDetails from API: $postDetails");
 
         for (var i = 0; i < postControllers.length; i++) {
           print(
               "Post $i - Eligibility ID: ${postControllers[i]["eligibilityDetails"]}");
+        }
+        print("Fetched Exam Data: ${exam}");
+        if (exam["postDetails"] != null) {
+          print("Post Details: ${exam["postDetails"]}");
+        } else {
+          print("❌ No postDetails returned in API response!");
         }
 
         shortInformationController = TextEditingController(
@@ -305,6 +330,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   void _addPostField() {
     final eligibilityViewModel =
         Provider.of<EligibilityViewModel>(context, listen: false);
+
     setState(() {
       postControllers.add({
         "Postname": TextEditingController(),
@@ -315,15 +341,37 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
         "SCPost": TextEditingController(),
         "STPost": TextEditingController(),
         "eligibilityDetails": eligibilityViewModel.eligibilities.isNotEmpty
-            ? eligibilityViewModel.eligibilities.first["id"] as String?
-            : "", // ✅ Set default or empty string
+            ? eligibilityViewModel.eligibilities.first["id"] as String? ?? ""
+            : "",
       });
+
+      postDetails.add({
+        "postName": "",
+        "totalPost": "",
+        "generalPost": "",
+        "obcPost": "",
+        "ewsPost": "",
+        "scPost": "",
+        "stPost": "",
+        "eligibilityDetails": "",
+      });
+
+      print("✅ Added new post, total count: ${postControllers.length}");
     });
   }
 
   void _savePost(int index) {
+    if (index < 0 || index >= postControllers.length) {
+      print("❌ Error: Invalid index $index for postControllers list!");
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
       setState(() {
+        if (index >= postDetails.length) {
+          postDetails.add({});
+        }
+
         postDetails[index] = {
           "postName": postControllers[index]["Postname"]!.text,
           "totalPost": postControllers[index]["TotalPost"]!.text,
@@ -332,23 +380,32 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
           "ewsPost": postControllers[index]["EWSPost"]!.text,
           "scPost": postControllers[index]["SCPost"]!.text,
           "stPost": postControllers[index]["STPost"]!.text,
-          "eligibilityDetails": postControllers[index]["EligibilityDetails"] ??
-              "", // ✅ Store as String
+          "eligibilityDetails": postControllers[index]["eligibilityDetails"]
+                  is Map
+              ? postControllers[index]["eligibilityDetails"]["_id"].toString()
+              : postControllers[index]["eligibilityDetails"].toString(),
         };
       });
-      print(
-          "Saved eligibilityDetails for index $index: ${postControllers[index]["EligibilityDetails"]}");
 
+      print("✅ Saved post at index $index: ${postDetails[index]}");
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Post updated successfully!")));
     }
   }
 
   void _deletePost(int index) {
-    setState(() {
-      postControllers.removeAt(index);
-      postDetails.removeAt(index);
-    });
+    if (index >= 0 && index < postControllers.length) {
+      setState(() {
+        postControllers.removeAt(index);
+        if (index < postDetails.length) {
+          postDetails.removeAt(index); // Keep both lists in sync
+        }
+      });
+
+      print("✅ Deleted post at index $index");
+    } else {
+      print("❌ Error: Cannot delete at invalid index $index");
+    }
   }
 
   // Function to pick a date
@@ -840,15 +897,26 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                     ),
                                     DropdownButtonFormField<String>(
                                       decoration: InputDecoration(
-                                        hintText: "Select Eligibility Details",
+                                        hintText: (postControllers.isNotEmpty &&
+                                                postControllers.length > index)
+                                            ? (postControllers[index]
+                                                        ["eligibilityDetails"]
+                                                    .isNotEmpty
+                                                ? postControllers[index]
+                                                    ["eligibilityDetails"]
+                                                : "Select Eligibility Details")
+                                            : "Select Eligibility Details",
                                         border: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(8)),
                                         filled: true,
                                         fillColor: white,
                                       ),
-                                      value: postControllers[index][
-                                          "eligibilityDetails"], // ✅ Ensure correct String format
+                                      value: (postControllers.isNotEmpty &&
+                                              postControllers.length > index)
+                                          ? postControllers[index]
+                                              ["eligibilityDetails"]
+                                          : null, // ✅ Prevents crash
                                       items: eligibilityViewModel.eligibilities
                                           .map((eligibility) {
                                         return DropdownMenuItem(
@@ -859,9 +927,11 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                       }).toList(),
                                       onChanged: (value) {
                                         setState(() {
-                                          postControllers[index]
-                                                  ["eligibilityDetails"] =
-                                              value; // ✅ Store the correct eligibility ID
+                                          if (postControllers.isNotEmpty &&
+                                              postControllers.length > index) {
+                                            postControllers[index]
+                                                ["eligibilityDetails"] = value;
+                                          }
                                         });
                                       },
                                       validator: (value) => value == null
@@ -875,15 +945,6 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            _savePost(index);
-                                            // if (Navigator.canPop(context)) {
-                                            //   Navigator.pop(context);
-                                            // }
-                                          },
-                                          child: Text("Save"),
-                                        ),
                                         ElevatedButton(
                                           onPressed: () {
                                             _deletePost(index);
@@ -905,6 +966,14 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                             ElevatedButton(
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
+                                  // Save each post before proceeding
+                                  for (int i = 0;
+                                      i < postControllers.length;
+                                      i++) {
+                                    _savePost(i);
+                                  }
+                                  print(
+                                      "📌 Final postDetails before saving: $postDetails");
                                   Map<String, dynamic> updatedExam = {
                                     "name": nameController.text,
                                     "examCategory": selectedCategory,

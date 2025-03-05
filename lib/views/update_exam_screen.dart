@@ -148,13 +148,25 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
               : exam["examCategory"].toString();
         }
 
-        // Ensure postControllers and postDetails are populated correctly
+        // ✅ Ensure postControllers and postDetails are initialized properly
         if (exam["postDetails"] != null &&
             (exam["postDetails"] as List).isNotEmpty) {
           postControllers = [];
-          postDetails = []; // ✅ Prevents empty list issue
+          postDetails = [];
 
           for (var post in exam["postDetails"]) {
+            String eligibilityId = ""; // Default value
+
+            // ✅ Check if eligibilityDetails is a Map and extract _id
+            if (post.containsKey("eligiblityDetails") &&
+                post["eligiblityDetails"] != null) {
+              if (post["eligiblityDetails"] is Map) {
+                eligibilityId = post["eligiblityDetails"]["_id"].toString();
+              } else {
+                eligibilityId = post["eligiblityDetails"].toString();
+              }
+            }
+
             postControllers.add({
               "Postname": TextEditingController(text: post["postName"] ?? ""),
               "TotalPost": TextEditingController(
@@ -169,12 +181,10 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                   TextEditingController(text: post["scPost"]?.toString() ?? ''),
               "STPost":
                   TextEditingController(text: post["stPost"]?.toString() ?? ''),
-              "eligibilityDetails": post["eligibilityDetails"] is Map
-                  ? post["eligibilityDetails"]["_id"].toString()
-                  : post["eligibilityDetails"].toString(),
+              "eligiblityDetails":
+                  eligibilityId, // ✅ Ensure correct _id is used
             });
 
-            // ✅ Populate postDetails correctly to avoid empty array issue
             postDetails.add({
               "postName": post["postName"] ?? "",
               "totalPost": post["totalPost"]?.toString() ?? '',
@@ -183,9 +193,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
               "ewsPost": post["ewsPost"]?.toString() ?? '',
               "scPost": post["scPost"]?.toString() ?? '',
               "stPost": post["stPost"]?.toString() ?? '',
-              "eligibilityDetails": post["eligibilityDetails"] is Map
-                  ? post["eligibilityDetails"]["_id"].toString()
-                  : post["eligibilityDetails"].toString(),
+              "eligiblityDetails": eligibilityId,
             });
           }
         }
@@ -340,7 +348,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
         "EWSPost": TextEditingController(),
         "SCPost": TextEditingController(),
         "STPost": TextEditingController(),
-        "eligibilityDetails": eligibilityViewModel.eligibilities.isNotEmpty
+        "eligiblityDetails": eligibilityViewModel.eligibilities.isNotEmpty
             ? eligibilityViewModel.eligibilities.first["id"] as String? ?? ""
             : "",
       });
@@ -353,7 +361,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
         "ewsPost": "",
         "scPost": "",
         "stPost": "",
-        "eligibilityDetails": "",
+        "eligiblityDetails": "",
       });
 
       print("✅ Added new post, total count: ${postControllers.length}");
@@ -380,10 +388,10 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
           "ewsPost": postControllers[index]["EWSPost"]!.text,
           "scPost": postControllers[index]["SCPost"]!.text,
           "stPost": postControllers[index]["STPost"]!.text,
-          "eligibilityDetails": postControllers[index]["eligibilityDetails"]
+          "eligiblityDetails": postControllers[index]["eligiblityDetails"]
                   is Map
-              ? postControllers[index]["eligibilityDetails"]["_id"].toString()
-              : postControllers[index]["eligibilityDetails"].toString(),
+              ? postControllers[index]["eligiblityDetails"]["_id"].toString()
+              : postControllers[index]["eligiblityDetails"].toString(),
         };
       });
 
@@ -486,24 +494,6 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     );
   }
 
-  // Styled TextField
-  Widget _buildTextField(TextEditingController controller, String label,
-      {bool isNumber = false}) {
-    return _styledCard(
-      TextFormField(
-        controller: controller,
-        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          filled: true,
-          fillColor: white,
-        ),
-        validator: (value) => value!.isEmpty ? "Enter $label" : null,
-      ),
-    );
-  }
-
   // Helper: Styled TextField with optional validation
   Widget _buildTextFieldWithValidation(
     TextEditingController controller,
@@ -521,10 +511,18 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
           filled: true,
           fillColor: white,
         ),
-        validator: isRequired
-            ? (value) =>
-                (value == null || value.isEmpty) ? "Enter $label" : null
-            : null,
+        validator: (value) {
+          if (isRequired && (value == null || value.isEmpty)) {
+            return "Enter $label";
+          }
+          if (isNumber && value != null && value.isNotEmpty) {
+            final numberRegex = RegExp(r'^\d+$'); // Allows only digits (0-9)
+            if (!numberRegex.hasMatch(value)) {
+              return "Only numbers are allowed";
+            }
+          }
+          return null; // Validation passed
+        },
       ),
     );
   }
@@ -854,11 +852,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                     ListTileControlAffinity.leading,
                               ),
                             ),
-                            SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: _addPostField,
-                              child: Text("+ Add Posts"),
-                            ),
+
                             SizedBox(height: 10),
 
                             ...List.generate(postControllers.length, (index) {
@@ -871,7 +865,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                         isRequired: true),
                                     _buildTextFieldWithValidation(
                                         postControllers[index]["TotalPost"]!,
-                                        "Total Post"),
+                                        "Total Post",
+                                        isNumber: true),
                                     _buildTextFieldWithValidation(
                                         postControllers[index]["GeneralPost"]!,
                                         "General Post",
@@ -897,26 +892,23 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                     ),
                                     DropdownButtonFormField<String>(
                                       decoration: InputDecoration(
-                                        hintText: (postControllers.isNotEmpty &&
-                                                postControllers.length > index)
-                                            ? (postControllers[index]
-                                                        ["eligibilityDetails"]
-                                                    .isNotEmpty
-                                                ? postControllers[index]
-                                                    ["eligibilityDetails"]
-                                                : "Select Eligibility Details")
-                                            : "Select Eligibility Details",
+                                        labelText: "Select Eligibility Details",
                                         border: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(8)),
                                         filled: true,
-                                        fillColor: white,
+                                        fillColor: Colors.white,
                                       ),
                                       value: (postControllers.isNotEmpty &&
                                               postControllers.length > index)
-                                          ? postControllers[index]
-                                              ["eligibilityDetails"]
-                                          : null, // ✅ Prevents crash
+                                          ? (postControllers[index]
+                                                          ["eligiblityDetails"]
+                                                      ?.isNotEmpty ??
+                                                  false
+                                              ? postControllers[index]
+                                                  ["eligiblityDetails"]
+                                              : null) // ✅ Prevents null assignment
+                                          : null,
                                       items: eligibilityViewModel.eligibilities
                                           .map((eligibility) {
                                         return DropdownMenuItem(
@@ -930,13 +922,17 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                           if (postControllers.isNotEmpty &&
                                               postControllers.length > index) {
                                             postControllers[index]
-                                                ["eligibilityDetails"] = value;
+                                                    ["eligiblityDetails"] =
+                                                value ?? "";
                                           }
                                         });
                                       },
-                                      validator: (value) => value == null
-                                          ? "Please select eligibility"
-                                          : null,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return "Please select eligiblity";
+                                        }
+                                        return null;
+                                      },
                                     ),
                                     SizedBox(
                                       height: 20,
@@ -948,9 +944,6 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                         ElevatedButton(
                                           onPressed: () {
                                             _deletePost(index);
-                                            // if (Navigator.canPop(context)) {
-                                            //   Navigator.pop(context);
-                                            // }
                                           },
                                           child: Text("Delete"),
                                           style: ElevatedButton.styleFrom(
@@ -962,6 +955,11 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                                 ),
                               );
                             }),
+                            SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: _addPostField,
+                              child: Text("+ Add Posts"),
+                            ),
                             SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: () async {

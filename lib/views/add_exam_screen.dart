@@ -204,10 +204,18 @@ class _AddExamScreenState extends State<AddExamScreen> {
           filled: true,
           fillColor: white,
         ),
-        validator: isRequired
-            ? (value) =>
-                (value == null || value.isEmpty) ? "Enter $label" : null
-            : null,
+        validator: (value) {
+          if (isRequired && (value == null || value.isEmpty)) {
+            return "Enter $label";
+          }
+          if (isNumber && value != null && value.isNotEmpty) {
+            final numberRegex = RegExp(r'^\d+$'); // Allows only digits (0-9)
+            if (!numberRegex.hasMatch(value)) {
+              return "Only numbers are allowed";
+            }
+          }
+          return null; // Validation passed
+        },
       ),
     );
   }
@@ -257,9 +265,18 @@ class _AddExamScreenState extends State<AddExamScreen> {
   }
 
   void _deletePost(int index) {
-    setState(() {
-      postControllers.removeAt(index);
-    });
+    if (index >= 0 && index < postControllers.length) {
+      setState(() {
+        postControllers.removeAt(index);
+        if (index < postDetails.length) {
+          postDetails.removeAt(index); // Keep both lists in sync
+        }
+      });
+
+      print("✅ Deleted post at index $index");
+    } else {
+      print("❌ Error: Cannot delete at invalid index $index");
+    }
   }
 
   int? parseNullableInt(String text) {
@@ -606,7 +623,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                       isRequired: true),
                                   _buildTextFieldWithValidation(
                                       postControllers[index]["TotalPost"]!,
-                                      "Total Post"),
+                                      "Total Post",
+                                      isNumber: true),
                                   _buildTextFieldWithValidation(
                                       postControllers[index]["GeneralPost"]!,
                                       "General Post",
@@ -671,9 +689,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                       ElevatedButton(
                                         onPressed: () {
                                           _deletePost(index);
-                                          if (Navigator.canPop(context)) {
-                                            Navigator.pop(context);
-                                          }
                                         },
                                         child: Text("Delete"),
                                         style: ElevatedButton.styleFrom(

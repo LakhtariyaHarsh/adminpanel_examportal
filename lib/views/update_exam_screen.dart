@@ -444,6 +444,39 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     );
   }
 
+  Widget TextFieldWithMultiLines(
+    TextEditingController controller,
+    String label, {
+    bool isNumber = false,
+    bool isRequired = false,
+    int maxLines = 1, // Default to single-line input
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.multiline,
+      minLines: maxLines, // Starts with 5 lines of space
+      maxLines: maxLines, // Allows expansion as needed
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        filled: true,
+        fillColor: white,
+      ),
+      validator: (value) {
+        if (isRequired && (value == null || value.isEmpty)) {
+          return "Enter $label";
+        }
+        if (isNumber && value != null && value.isNotEmpty) {
+          final numberRegex = RegExp(r'^\d+$'); // Allows only digits (0-9)
+          if (!numberRegex.hasMatch(value)) {
+            return "Only numbers are allowed";
+          }
+        }
+        return null; // Validation passed
+      },
+    );
+  }
+
   // Styled Date Picker
   Widget _buildDatePicker(
       String label, DateTime? selectedDate, Function(DateTime) onDateSelected) {

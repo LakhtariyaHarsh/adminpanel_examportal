@@ -109,30 +109,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
   bool downloadBroucher = false;
   bool correctionInForm = false;
 
-  @override
-  void initState() {
-    super.initState();
-
-    // Ensure selectedCategory and selectedeligibilityDetails have default values
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final categoryViewModel =
-          Provider.of<CategoryViewModel>(context, listen: false);
-      final eligibilityViewModel =
-          Provider.of<EligibilityViewModel>(context, listen: false);
-
-      setState(() {
-        selectedCategory = categoryViewModel.categories.isNotEmpty
-            ? categoryViewModel.categories.first["id"]
-            : null;
-
-        selectedeligibilityDetails =
-            eligibilityViewModel.eligibilities.isNotEmpty
-                ? eligibilityViewModel.eligibilities.first["id"]
-                : null;
-      });
-    });
-  }
-
   // Function to pick a date
   Future<void> _selectDate(BuildContext context, DateTime? initialDate,
       Function(DateTime) onDateSelected) async {
@@ -194,14 +170,16 @@ class _AddExamScreenState extends State<AddExamScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CheckboxListTile(
-          title: Text(
-            label,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        _styledCard(
+          CheckboxListTile(
+            title: Text(
+              label,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            value: value,
+            onChanged: (val) => onChanged(val!),
+            controlAffinity: ListTileControlAffinity.leading,
           ),
-          value: value,
-          onChanged: (val) => onChanged(val!),
-          controlAffinity: ListTileControlAffinity.leading,
         ),
         if (value)
           _buildDatePicker("$label Date", selectedDate, onDateSelected),
@@ -275,6 +253,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
   void _addPostField() {
     final eligibilityViewModel =
         Provider.of<EligibilityViewModel>(context, listen: false);
+
     setState(() {
       postControllers.add({
         "Postname": TextEditingController(),
@@ -285,13 +264,14 @@ class _AddExamScreenState extends State<AddExamScreen> {
         "SCPost": TextEditingController(),
         "STPost": TextEditingController(),
         "EligibilityDetails": eligibilityViewModel.eligibilities.isNotEmpty
-            ? eligibilityViewModel.eligibilities.first["id"] as String?
-            : null, // Store as String, not TextEditingController
+            ? eligibilityViewModel.eligibilities.first["id"]
+            : "", // Ensure it's a non-null value
       });
     });
   }
 
   void _savePost(int index) {
+    print("These is the Podst.........................................");
     if (_formKey.currentState!.validate()) {
       setState(() {
         postDetails.add({
@@ -302,9 +282,16 @@ class _AddExamScreenState extends State<AddExamScreen> {
           "ewsPost": postControllers[index]["EWSPost"]?.text ?? "",
           "scPost": postControllers[index]["SCPost"]?.text ?? "",
           "stPost": postControllers[index]["STPost"]?.text ?? "",
-          "eligibilityDetails":
+          "eligiblityDetails":
               postControllers[index]["EligibilityDetails"] ?? "",
         });
+
+    print("These is the Podst data.........................................$postDetails");
+    print("These is the Podst Length........................................${postDetails.length}");
+
+
+        print(
+            "Saved eligibilityDetails for index $index: ${postControllers[index]["EligibilityDetails"]}");
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -328,19 +315,16 @@ class _AddExamScreenState extends State<AddExamScreen> {
     }
   }
 
-  int? parseNullableInt(String? text) {
-    return (text == null || text.trim().isEmpty) ? null : int.tryParse(text);
+  int? parseNullableInt(String text) {
+    return text.trim().isEmpty ? null : int.tryParse(text);
   }
 
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
-    final examViewModel = Provider.of<ExamViewModel>(context);
+
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isMobile = screenWidth < 1100;
     bool isDesktop = screenWidth >= 1100;
-    final categoryViewModel = Provider.of<CategoryViewModel>(context);
-    final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
     final GlobalKey<FormState> _mobileFormKey = GlobalKey<FormState>();
     final GlobalKey<FormState> _desktopFormKey = GlobalKey<FormState>();
 
@@ -394,7 +378,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
   Widget buildDesktopView({
     required GlobalKey<FormState> formKey,
   }) {
-    final authViewModel = Provider.of<AuthViewModel>(context);
     final examViewModel = Provider.of<ExamViewModel>(context);
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
@@ -972,11 +955,16 @@ class _AddExamScreenState extends State<AddExamScreen> {
                     ),
                     SizedBox(height: 20),
                     ...List.generate(postControllers.length, (index) {
+                      if (postControllers.isEmpty ||
+                          postControllers[index] == null) {
+                        return SizedBox(); // Return an empty widget if no data exists
+                      }
                       return _styledCard(
                         Column(
                           children: [
                             _buildTextFieldWithValidation(
-                                postControllers[index]["Postname"]!,
+                                postControllers[index]["Postname"] ??
+                                    TextEditingController(),
                                 "Post Name",
                                 isRequired: true),
                             SizedBox(height: 20),
@@ -1045,7 +1033,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                 fillColor: white,
                               ),
                               value: postControllers[index]
-                                  ["EligibilityDetails"], // Use as String
+                                      ["EligibilityDetails"] ??
+                                  "", // Ensure it's not null
                               items: eligibilityViewModel.eligibilities
                                   .map((eligibility) {
                                 return DropdownMenuItem(
@@ -1056,14 +1045,13 @@ class _AddExamScreenState extends State<AddExamScreen> {
                               onChanged: (value) {
                                 setState(() {
                                   postControllers[index]["EligibilityDetails"] =
-                                      value;
-                                  print(
-                                      "Updated eligibilityDetails for index $index: $value"); // Debugging
+                                      value ?? "";
                                 });
                               },
-                              validator: (value) => value == null
-                                  ? "Please select eligibility"
-                                  : null,
+                              validator: (value) =>
+                                  (value == null || value.isEmpty)
+                                      ? "Please select eligibility"
+                                      : null,
                             ),
                             SizedBox(
                               height: 20,
@@ -1097,6 +1085,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
+              print("Buttpn Press....................00");
               if (formKey.currentState!.validate()) {
                 for (int i = 0; i < postControllers.length; i++) {
                   _savePost(i);
@@ -1111,7 +1100,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                   "organizationName": organizationNameController.text,
                   "fullNameOfExam": fullNameOfExamController.text,
                   "advertisementNo": advertisementNoController.text,
-                  "applicationBegin": applicationBegin?.toIso8601String() ?? "",
+                  "applicationBegin": applicationBegin?.toIso8601String(),
                   "lastDateToApply": lastDateToApply?.toIso8601String(),
                   "lastDateToPayExamFee":
                       lastDateToPayExamFee?.toIso8601String(),
@@ -1174,7 +1163,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                       correctiondateInForm?.toIso8601String(),
                   "jobPostingDate": jobPostingDate?.toIso8601String(),
                 };
-
+                print("These is the exam .................................................$newExam");
                 await examViewModel.addExam(newExam);
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -1603,11 +1592,16 @@ class _AddExamScreenState extends State<AddExamScreen> {
                     ),
                     SizedBox(height: 20),
                     ...List.generate(postControllers.length, (index) {
+                      if (postControllers.isEmpty ||
+                          postControllers[index] == null) {
+                        return SizedBox(); // Return an empty widget if no data exists
+                      }
                       return _styledCard(
                         Column(
                           children: [
                             _buildTextFieldWithValidation(
-                                postControllers[index]["Postname"]!,
+                                postControllers[index]["Postname"] ??
+                                    TextEditingController(),
                                 "Post Name",
                                 isRequired: true),
                             SizedBox(height: 20),
@@ -1648,7 +1642,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                 fillColor: white,
                               ),
                               value: postControllers[index]
-                                  ["EligibilityDetails"], // Use as String
+                                      ["EligibilityDetails"] ??
+                                  "", // Ensure it's not null
                               items: eligibilityViewModel.eligibilities
                                   .map((eligibility) {
                                 return DropdownMenuItem(
@@ -1659,14 +1654,13 @@ class _AddExamScreenState extends State<AddExamScreen> {
                               onChanged: (value) {
                                 setState(() {
                                   postControllers[index]["EligibilityDetails"] =
-                                      value;
-                                  print(
-                                      "Updated eligibilityDetails for index $index: $value"); // Debugging
+                                      value ?? "";
                                 });
                               },
-                              validator: (value) => value == null
-                                  ? "Please select eligibility"
-                                  : null,
+                              validator: (value) =>
+                                  (value == null || value.isEmpty)
+                                      ? "Please select eligibility"
+                                      : null,
                             ),
                             SizedBox(
                               height: 20,
@@ -1709,7 +1703,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
                   "organizationName": organizationNameController.text,
                   "fullNameOfExam": fullNameOfExamController.text,
                   "advertisementNo": advertisementNoController.text,
-                  "applicationBegin": applicationBegin?.toIso8601String() ?? "",
+                  "applicationBegin": applicationBegin?.toIso8601String(),
                   "lastDateToApply": lastDateToApply?.toIso8601String(),
                   "lastDateToPayExamFee":
                       lastDateToPayExamFee?.toIso8601String(),
@@ -1787,5 +1781,27 @@ class _AddExamScreenState extends State<AddExamScreen> {
         ],
       ),
     );
+  }
+
+  Widget buildDateField(
+      String title, DateTime? date, Function(DateTime) onSelect) {
+    return ListTile(
+      title: Text("$title: ${date?.toLocal().toString().split(' ')[0] ?? ''}"),
+      trailing: Icon(Icons.calendar_today),
+      onTap: () => _selectDate(context, date, onSelect),
+    );
+  }
+
+  Widget buildNumberField(String label, TextEditingController controller) {
+    return TextFormField(
+        controller: controller,
+        decoration: InputDecoration(labelText: label),
+        keyboardType: TextInputType.number);
+  }
+
+  Widget buildCheckboxField(
+      String title, bool value, Function(bool?) onChanged) {
+    return CheckboxListTile(
+        title: Text(title), value: value, onChanged: onChanged);
   }
 }

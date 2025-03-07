@@ -250,7 +250,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
     return TextFormField(
       controller: controller,
       keyboardType: isNumber ? TextInputType.number : TextInputType.multiline,
-      minLines: maxLines, // Starts with 5 lines of space
       maxLines: maxLines, // Allows expansion as needed
       decoration: InputDecoration(
         labelText: label,

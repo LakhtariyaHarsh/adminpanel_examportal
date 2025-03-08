@@ -34,50 +34,57 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _buildDivider() {
-    return const Divider();
+    return const Divider(color: white24, thickness: 1);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Create a list of drawer items by combining expandable menus and the logout item.
-    final List<Widget> drawerItems = [
-      ...menuItems.entries.map((entry) {
-        return _buildExpandableMenu(context, entry.key, entry.value);
-      }).toList(),
-      _buildDrawerItem(context, Icons.logout, "Logout", "/login",
-          isLogout: true),
-    ];
-
     return Drawer(
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.zero, // Force removal of default border radius
+      ),
       child: Container(
-        color: white, // Change drawer body color to white
+        color: const Color(0xFF2C2F3F), // Dark sidebar background
         child: Column(
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: DrawerHeader(
-                decoration: const BoxDecoration(color: white),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.dashboard, size: 40, color: bluegrey),
-                    SizedBox(height: 10),
-                    Text("ADMIN DASHBOARD",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: black87)),
-                  ],
-                ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  CircleAvatar(
+                    backgroundImage: AssetImage("assets/images/login.png"),
+                    radius: 30,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Hi, Admin 👋",
+                    style: TextStyle(
+                        color: white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
+            _buildDivider(),
             Expanded(
               child: ListView.separated(
-                itemCount: drawerItems.length,
+                itemCount: menuItems.keys.length,
+                itemBuilder: (context, index) {
+                  String sectionTitle = menuItems.keys.elementAt(index);
+                  List<Map<String, String>> sectionItems =
+                      menuItems[sectionTitle]!;
+                  return _buildExpandableMenu(
+                      context, sectionTitle, sectionItems);
+                },
                 separatorBuilder: (context, index) => _buildDivider(),
-                itemBuilder: (context, index) => drawerItems[index],
               ),
             ),
+            _buildDivider(),
+            _buildDrawerItem(context, Icons.logout, "Logout", "/login",
+                isLogout: true),
           ],
         ),
       ),
@@ -86,13 +93,21 @@ class CustomDrawer extends StatelessWidget {
 
   Widget _buildExpandableMenu(
       BuildContext context, String title, List<Map<String, String>> items) {
-    return ExpansionTile(
-      leading: _getIcon(title),
-      title: Text(title),
-      children: items.map((item) {
-        return _buildDrawerItem(
-            context, Icons.circle, item["title"]!, item["route"]!);
-      }).toList(),
+    return Theme(
+      data: ThemeData().copyWith(dividerColor: transparent),
+      child: ExpansionTile(
+        iconColor: white,
+        collapsedIconColor: white70,
+        leading: _getIcon(title),
+        title: Text(
+          title,
+          style: const TextStyle(color: white, fontWeight: FontWeight.bold),
+        ),
+        children: items.map((item) {
+          return _buildDrawerItem(
+              context, Icons.circle, item["title"]!, item["route"]!);
+        }).toList(),
+      ),
     );
   }
 
@@ -102,23 +117,48 @@ class CustomDrawer extends StatelessWidget {
     bool isSelected =
         GoRouter.of(context).routerDelegate.currentConfiguration.fullPath ==
             route;
-    return Container(
-      color: isSelected ? bluegray : Colors.transparent,
-      child: ListTile(
-        leading: Icon(icon, color: isSelected ? Colors.white : bluegrey),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : black,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: MouseRegion(
+        onEnter: (_) => {},
+        onExit: (_) => {},
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () {
+            if (isLogout) {
+              onLogout();
+            }
+            context.go(route);
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            decoration: BoxDecoration(
+              color: isSelected ? blue.withOpacity(0.9) : transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected ? white : white70,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: isSelected ? white : white70,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        onTap: () {
-          if (isLogout) {
-            onLogout();
-          }
-          context.go(route);
-        },
       ),
     );
   }
@@ -126,15 +166,15 @@ class CustomDrawer extends StatelessWidget {
   Icon _getIcon(String title) {
     switch (title) {
       case "Exams":
-        return Icon(Icons.school, color: bluegrey);
+        return Icon(Icons.school, color: white);
       case "Category":
-        return Icon(Icons.category, color: bluegrey);
+        return Icon(Icons.category, color: white);
       case "Eligibility":
-        return Icon(Icons.verified_user, color: bluegrey);
+        return Icon(Icons.verified_user, color: white);
       case "Post":
-        return Icon(Icons.article, color: bluegrey);
+        return Icon(Icons.article, color: white);
       default:
-        return Icon(Icons.dashboard, color: bluegrey);
+        return Icon(Icons.dashboard, color: white);
     }
   }
 }

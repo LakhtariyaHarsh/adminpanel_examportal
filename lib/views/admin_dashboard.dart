@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/button.dart';
 import 'package:admin_panel/constants/constant.dart';
 import 'package:admin_panel/constants/customdrawer.dart';
 import 'package:admin_panel/view_models/exam_view_model.dart';
@@ -53,24 +54,32 @@ class _AdminDashboardState extends State<AdminDashboard> {
         ? examViewModel.searchResults
         : examViewModel.exams;
     final double screenWidth = MediaQuery.of(context).size.width;
+    bool isTablet = screenWidth > 600;
     bool isDesktop = screenWidth >= 1100;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: bluegray,
-        title: Center(
-          child: Text("ALL EXAMS",
-              style: TextStyle(color: white)),
-        ),
-       
+       appBar: AppBar(
+        backgroundColor: blue,
+        title: Center(child: Row(
+          children: [
+            Image.asset("assets/images/app_logo.png", height: 30),
+            SizedBox(width: 10),
+            Text("Exam Screen", style: TextStyle(color: white)),
+          ],
+        )),
       ),
       drawer: isDesktop
-          ? null :CustomDrawer(onLogout: () => authViewModel.logout(),),
+          ? null
+          : CustomDrawer(
+              onLogout: () => authViewModel.logout(),
+            ),
       body: Row(
         children: [
           //Drawer for desktop
           isDesktop
-              ? CustomDrawer(onLogout: () => authViewModel.logout(),)
+              ? CustomDrawer(
+                  onLogout: () => authViewModel.logout(),
+                )
               : SizedBox(),
           examViewModel.isLoading && examViewModel.exams.isEmpty
               ? Expanded(child: Center(child: CircularProgressIndicator()))
@@ -86,27 +95,97 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           padding: const EdgeInsets.all(20.0),
                           child: Column(
                             children: [
+                              Text("All Exams",style: TextStyle(fontSize: 30),), Divider(),
+                              SizedBox(height: 20),
                               // Search Bar
-                              TextField(
-                                controller: _searchController,
-                                onChanged: (value) {
-                                  // If search query is empty, clear search results.
-                                  if (value.isEmpty) {
-                                    examViewModel.clearSearch();
-                                  } else {
-                                    // Otherwise, perform search.
-                                    examViewModel.searchExams(value);
-                                  }
-                                },
-                                decoration: InputDecoration(
-                                  labelText: "Search Exams",
-                                  prefixIcon: Icon(Icons.search),
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                  filled: true,
-                                  fillColor: white,
-                                ),
-                              ),
+                              isDesktop || isTablet
+                                  ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        // Search Field with Fixed Width
+                                        SizedBox(
+                                          width:
+                                              300, // Set fixed width for the search field
+                                          child: TextField(
+                                            controller: _searchController,
+                                            onChanged: (value) {
+                                              if (value.isEmpty) {
+                                                examViewModel.clearSearch();
+                                              } else {
+                                                examViewModel
+                                                    .searchExams(value);
+                                              }
+                                            },
+                                            decoration: InputDecoration(
+                                              labelText: "Search Exams",
+                                              prefixIcon: Icon(Icons.search),
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10)),
+                                              filled: true,
+                                              fillColor: white,
+                                            ),
+                                          ),
+                                        ),
+
+                                        // Button with Fixed Width
+                                        SizedBox(
+                                            width:
+                                                150, // Set fixed width for the button
+                                            height:
+                                                50, // Optional: Set fixed height
+                                            child: CustomButton(
+                                              text: "Add Exam",
+                                              route: "/exams/add",
+                                              backgroundColor: Colors.blue,
+                                              textColor: Colors.white,
+                                              borderRadius: 8.0,
+                                            )),
+                                      ],
+                                    )
+                                  : Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Search Field with Fixed Width
+                                        TextField(
+                                          controller: _searchController,
+                                          onChanged: (value) {
+                                            if (value.isEmpty) {
+                                              examViewModel.clearSearch();
+                                            } else {
+                                              examViewModel.searchExams(value);
+                                            }
+                                          },
+                                          decoration: InputDecoration(
+                                            labelText: "Search Exams",
+                                            prefixIcon: Icon(Icons.search),
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10)),
+                                            filled: true,
+                                            fillColor: white,
+                                          ),
+                                        ),
+                                        SizedBox(height: 20),
+
+                                        // Button with Fixed Width
+                                        SizedBox(
+                                            width:
+                                                150, // Set fixed width for the button
+                                            height:
+                                                50, // Optional: Set fixed height
+                                            child: CustomButton(
+                                              text: "Add Exam",
+                                              route: "/exams/add",
+                                              backgroundColor: Colors.blue,
+                                              textColor: Colors.white,
+                                              borderRadius: 8.0,
+                                            )),
+                                      ],
+                                    ),
                               SizedBox(height: 20),
                               Expanded(
                                 child: ListView.builder(
@@ -116,15 +195,19 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                     if (index == displayedExams.length) {
                                       return examViewModel.isLoadingMore
                                           ? Center(
-                                              child: CircularProgressIndicator())
+                                              child:
+                                                  CircularProgressIndicator())
                                           : SizedBox();
                                     }
                                     final exam = displayedExams[index];
                                     return Card(
-                                      margin: EdgeInsets.symmetric(vertical: 10),
+                                      color: bluegray50,
+                                      margin:
+                                          EdgeInsets.symmetric(vertical: 10),
                                       elevation: 4,
                                       shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10)),
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
                                       child: ListTile(
                                         title: Text(
                                           exam["name"] ?? "",
@@ -139,7 +222,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                             children: [
                                               IconButton(
                                                 icon: Icon(Icons.edit,
-                                                    color: Colors.blue),
+                                                    color: blue),
                                                 onPressed: () async {
                                                   GoRouter.of(context).push(
                                                     '/exams/update/${exam["id"]}/${Uri.encodeComponent(exam["name"] ?? "")}/${exam["examcategory"]}?postid=${exam["postDetails"] ?? ""}&eligibilityid=${exam["eligibilityCriteria"] ?? ""}',
@@ -150,10 +233,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                 icon: Icon(Icons.delete,
                                                     color: red),
                                                 onPressed: () async {
-                                                  bool success = await examViewModel
-                                                          .deleteExam(
-                                                              exam["id"] ?? "") ??
-                                                      false;
+                                                  bool success =
+                                                      await examViewModel
+                                                              .deleteExam(
+                                                                  exam["id"] ??
+                                                                      "") ??
+                                                          false;
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(
                                                     SnackBar(

@@ -73,7 +73,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: bluegray,
+          backgroundColor: blue,
           title: Center(child: Text("Add Post", style: TextStyle(color: white)))),
       body: SingleChildScrollView(
         child: Center(

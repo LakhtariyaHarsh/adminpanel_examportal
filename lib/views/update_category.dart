@@ -1,5 +1,8 @@
+import 'package:admin_panel/constants/button.dart';
 import 'package:admin_panel/constants/constant.dart';
+import 'package:admin_panel/constants/customdrawer.dart';
 import 'package:admin_panel/view_models/Category_view_model.dart';
+import 'package:admin_panel/view_models/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -66,18 +69,16 @@ class _UpdateCategoryState extends State<UpdateCategory> {
   // Styled TextField
   Widget _buildTextField(TextEditingController controller, String label,
       {bool isNumber = false}) {
-    return _styledCard(
-      TextFormField(
-        controller: controller,
-        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          filled: true,
-          fillColor: white,
-        ),
-        validator: (value) => value!.isEmpty ? "Enter $label" : null,
+    return TextFormField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        filled: true,
+        fillColor: white,
       ),
+      validator: (value) => value!.isEmpty ? "Enter $label" : null,
     );
   }
 
@@ -85,54 +86,114 @@ class _UpdateCategoryState extends State<UpdateCategory> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     bool isTablet = screenWidth >= 720 && screenWidth < 1024;
-    bool isDesktop = screenWidth >= 1024;
+    bool isDesktop = screenWidth >= 1100;
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
+    final authViewModel = Provider.of<AuthViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(backgroundColor: bluegray,
-          title: Center(child: Text("Update Category", style: TextStyle(color: white)))),
+       appBar: AppBar(
+        backgroundColor: blue,
+        title: Center(child: Row(
+          children: [
+            Image.asset("assets/images/app_logo.png", height: 30),
+            SizedBox(width: 10),
+            Text("Update Category Screen", style: TextStyle(color: white)),
+          ],
+        )),
+      ),
+      drawer: isDesktop
+          ? null
+          : CustomDrawer(
+              onLogout: () => authViewModel.logout(),
+            ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Center(
-                child: Card(
-                  margin: EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                  elevation: 4,
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Container(
-                      width: isDesktop ? screenWidth * 0.4 : isTablet ? screenWidth * 0.7 : screenWidth * 0.95,
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            _buildTextField(nameController, "Category Name"),
-                            ElevatedButton(
-                              onPressed: () async {
-                                if (_formKey.currentState!.validate()) {
-                                  Map<String, dynamic> updatedCategory = {
-                                    "categoryName": nameController.text,
-                                  };
+          : Container(
+              color: bluegray50,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Drawer for desktop
+                  isDesktop
+                      ? CustomDrawer(
+                          onLogout: () => authViewModel.logout(),
+                        )
+                      : SizedBox(),
 
-                                  await categoryViewModel.updateCategory(
-                                      widget.id, updatedCategory);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              "Category updated successfully!")));
-                                  context.go('/categories');
-                                }
-                              },
-                              child: Text("Update category"),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Card(
+                              color: white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          children: [
+                                            IconButton(
+                                                onPressed: () =>
+                                                    context.go("/categories"),
+                                                icon: Icon(Icons.arrow_back)),
+                                            Text(
+                                              "Update Category",
+                                              style: TextStyle(fontSize: 30),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Divider(),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                      _buildTextField(
+                                          nameController, "Category Name"),
+                                      // Submit Button
+                                      SizedBox(height: 20),
+
+                                      CustomButton(
+                                        width: 200,
+                                        text: "Update category",
+                                        onPressed: () async {
+                                          if (_formKey.currentState!
+                                              .validate()) {
+                                            Map<String, dynamic>
+                                                updatedCategory = {
+                                              "categoryName":
+                                                  nameController.text,
+                                            };
+
+                                            await categoryViewModel
+                                                .updateCategory(
+                                                    widget.id, updatedCategory);
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        "Category updated successfully!")));
+                                            context.go('/categories');
+                                          }
+                                        },
+                                        textColor: Colors.white,
+                                        borderRadius: 8.0,
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
+                          )
+                        ],
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
     );

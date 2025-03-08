@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/button.dart';
 import 'package:admin_panel/constants/constant.dart';
 import 'package:admin_panel/constants/customdrawer.dart';
 import 'package:admin_panel/view_models/Category_view_model.dart';
@@ -58,15 +59,25 @@ class _CategoryState extends State<Category> {
         : categoryViewModel.categories;
 
     final double screenWidth = MediaQuery.of(context).size.width;
+    bool isTablet = screenWidth > 600;
     bool isDesktop = screenWidth >= 1100;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: bluegray,
-        title: Center(child: Text("ALL CATEGORIES", style: TextStyle(color: white))),
+       appBar: AppBar(
+        backgroundColor: blue,
+        title: Center(child: Row(
+          children: [
+            Image.asset("assets/images/app_logo.png", height: 30),
+            SizedBox(width: 10),
+            Text("Category Screen", style: TextStyle(color: white)),
+          ],
+        )),
       ),
-      drawer:isDesktop
-          ? null :CustomDrawer(onLogout: () => authViewModel.logout(),),
+      drawer: isDesktop
+          ? null
+          : CustomDrawer(
+              onLogout: () => authViewModel.logout(),
+            ),
       body: Row(
         children: [
           //Drawer for desktop
@@ -82,96 +93,170 @@ class _CategoryState extends State<Category> {
                     color: bluegray50,
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        children: [
-                          // Search Bar
-                          TextField(
-                            controller: _searchController,
-                            onChanged: (value) {
-                              setState(() {
-                                _searchQuery = value;
-                              });
-                              if (value.isEmpty) {
-                                categoryViewModel.clearSearch();
-                              } else {
-                                categoryViewModel.searchCategories(value);
-                              }
-                            },
-                            decoration: InputDecoration(
-                              labelText: "Search Categories",
-                              prefixIcon: Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              filled: true,
-                              fillColor: white,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          // Category List
-                          Expanded(
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              itemCount: displayedCategories.length,
-                              itemBuilder: (context, index) {
-                                final category = displayedCategories[index];
-                                return Card(
-                                  margin: EdgeInsets.symmetric(vertical: 10),
-                                  elevation: 4,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                  child: ListTile(
-                                    title: Text(
-                                      category["name"] ??
-                                          category["categoryName"] ??
-                                          "",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500),
+                      child: Card(
+                        color: white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              Text("All Categories",style: TextStyle(fontSize: 30),), Divider(),
+                                  SizedBox(height: 20),
+                              // Search Bar
+                              isDesktop || isTablet
+                                  ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        SizedBox(
+                                          width: 300,
+                                          child: TextField(
+                                            controller: _searchController,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _searchQuery = value;
+                                              });
+                                              if (value.isEmpty) {
+                                                categoryViewModel.clearSearch();
+                                              } else {
+                                                categoryViewModel
+                                                    .searchCategories(value);
+                                              }
+                                            },
+                                            decoration: InputDecoration(
+                                              labelText: "Search Categories",
+                                              prefixIcon: Icon(Icons.search),
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10)),
+                                              filled: true,
+                                              fillColor: white,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                            width:
+                                                200, // Set fixed width for the button
+                                            height:
+                                                50, // Optional: Set fixed height
+                                            child: CustomButton(
+                                              text: "Add Categories",
+                                              route: "/categories/add",
+                                              backgroundColor: Colors.blue,
+                                              textColor: Colors.white,
+                                              borderRadius: 8.0,
+                                            )),
+                                      ],
+                                    )
+                                  : Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        TextField(
+                                          controller: _searchController,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _searchQuery = value;
+                                            });
+                                            if (value.isEmpty) {
+                                              categoryViewModel.clearSearch();
+                                            } else {
+                                              categoryViewModel
+                                                  .searchCategories(value);
+                                            }
+                                          },
+                                          decoration: InputDecoration(
+                                            labelText: "Search Categories",
+                                            prefixIcon: Icon(Icons.search),
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10)),
+                                            filled: true,
+                                            fillColor: white,
+                                          ),
+                                        ),
+                                        SizedBox(height: 20),
+                                        SizedBox(
+                                            width:
+                                                200, // Set fixed width for the button
+                                            height:
+                                                50, // Optional: Set fixed height
+                                            child: CustomButton(
+                                              text: "Add Categories",
+                                              route: "/categories/add",
+                                              backgroundColor: Colors.blue,
+                                              textColor: Colors.white,
+                                              borderRadius: 8.0,
+                                            )),
+                                      ],
                                     ),
-                                    trailing: SizedBox(
-                                      width: 100,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.edit,
-                                                color: Colors.blue),
-                                            onPressed: () {
-                                              context.push(
-                                                  '/categories/update/${category["id"]}');
-                                            },
+                              SizedBox(height: 20),
+                              // Category List
+                              Expanded(
+                                child: ListView.builder(
+                                  controller: _scrollController,
+                                  itemCount: displayedCategories.length,
+                                  itemBuilder: (context, index) {
+                                    final category = displayedCategories[index];
+                                    return Card(
+                                      color: bluegray50,
+                                      margin: EdgeInsets.symmetric(vertical: 10),
+                                      elevation: 4,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10)),
+                                      child: ListTile(
+                                        title: Text(
+                                          category["name"] ??
+                                              category["categoryName"] ??
+                                              "",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        trailing: SizedBox(
+                                          width: 100,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(Icons.edit,
+                                                    color: Colors.blue),
+                                                onPressed: () {
+                                                  context.push(
+                                                      '/categories/update/${category["id"]}');
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon:
+                                                    Icon(Icons.delete, color: red),
+                                                onPressed: () async {
+                                                  final id = category["id"] ?? "";
+                                                  await categoryViewModel
+                                                      .deleteCategory(id);
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                        content: Text(
+                                                            "Category deleted successfully")),
+                                                  );
+                                                },
+                                              ),
+                                            ],
                                           ),
-                                          IconButton(
-                                            icon: Icon(Icons.delete,
-                                                color: red),
-                                            onPressed: () async {
-                                              final id = category["id"] ?? "";
-                                              await categoryViewModel
-                                                  .deleteCategory(id);
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                    content: Text(
-                                                        "Category deleted successfully")),
-                                              );
-                                            },
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              // Optional: A loader at the bottom when loading more data.
+                              if (categoryViewModel.isLoading &&
+                                  categoryViewModel.categories.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(),
+                                ),
+                            ],
                           ),
-                          // Optional: A loader at the bottom when loading more data.
-                          if (categoryViewModel.isLoading &&
-                              categoryViewModel.categories.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
-                            ),
-                        ],
+                        ),
                       ),
                     ),
                   ),

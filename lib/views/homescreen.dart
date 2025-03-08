@@ -36,8 +36,14 @@ class _HomescreenState extends State<Homescreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: bluegray,
-        title: Center(child: Text("Dashboard Screen", style: TextStyle(color: white))),
+        backgroundColor: blue,
+        title: Center(child: Row(
+          children: [
+            Image.asset("assets/images/app_logo.png", height: 30),
+            SizedBox(width: 10),
+            Text("Dashboard Screen", style: TextStyle(color: white)),
+          ],
+        )),
       ),
       drawer: isDesktop
           ? null :CustomDrawer(onLogout: () => authViewModel.logout(),),

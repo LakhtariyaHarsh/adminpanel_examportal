@@ -1,3 +1,4 @@
+import 'package:admin_panel/constants/button.dart';
 import 'package:admin_panel/constants/constant.dart';
 import 'package:admin_panel/constants/customdrawer.dart';
 import 'package:admin_panel/view_models/Category_view_model.dart';
@@ -15,7 +16,8 @@ class AddExamScreen extends StatefulWidget {
 }
 
 class _AddExamScreenState extends State<AddExamScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _mobileFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _desktopFormKey = GlobalKey<FormState>();
 
   // Controllers for text fields
   final TextEditingController nameController = TextEditingController();
@@ -257,41 +259,60 @@ class _AddExamScreenState extends State<AddExamScreen> {
     setState(() {
       postControllers.add({
         "Postname": TextEditingController(),
-        "TotalPost": TextEditingController(),
+        "TotalPost": TextEditingController(), // Ensure all are initialized
         "GeneralPost": TextEditingController(),
         "OBCPost": TextEditingController(),
         "EWSPost": TextEditingController(),
         "SCPost": TextEditingController(),
         "STPost": TextEditingController(),
         "EligibilityDetails": eligibilityViewModel.eligibilities.isNotEmpty
-            ? eligibilityViewModel.eligibilities.first["id"]
-            : "", // Ensure it's a non-null value
+            ? eligibilityViewModel.eligibilities.first["id"] ?? "default_id"
+            : "default_id", // Ensuring it's never null
       });
     });
   }
 
-  void _savePost(int index) {
-    print("These is the Podst.........................................");
-    if (_formKey.currentState!.validate()) {
+  void _savePost(int index, GlobalKey<FormState> formKey) {
+    if (index >= postControllers.length || postControllers[index] == null) {
+      print("❌ Error: Invalid index $index, skipping.");
+      return;
+    }
+
+    print("Saving Post at Index $index");
+    print("Post Name: ${postControllers[index]["Postname"]?.text ?? "N/A"}");
+    print(
+        "EligibilityDetails: ${postControllers[index]["EligibilityDetails"]}");
+
+    if (formKey.currentState!.validate()) {
       setState(() {
         postDetails.add({
-          "postName": postControllers[index]["Postname"]?.text ?? "",
-          "totalPost": postControllers[index]["TotalPost"]?.text ?? "",
-          "generalPost": postControllers[index]["GeneralPost"]?.text ?? "",
-          "obcPost": postControllers[index]["OBCPost"]?.text ?? "",
-          "ewsPost": postControllers[index]["EWSPost"]?.text ?? "",
-          "scPost": postControllers[index]["SCPost"]?.text ?? "",
-          "stPost": postControllers[index]["STPost"]?.text ?? "",
+          "postName": postControllers[index]["Postname"]?.text ?? "post1",
+          "totalPost":
+              postControllers[index]["TotalPost"]?.text.isNotEmpty == true
+                  ? postControllers[index]["TotalPost"]!.text
+                  : "total1",
+          "generalPost":
+              postControllers[index]["GeneralPost"]?.text.isNotEmpty == true
+                  ? postControllers[index]["GeneralPost"]!.text
+                  : "general1",
+          "obcPost": postControllers[index]["OBCPost"]?.text.isNotEmpty == true
+              ? postControllers[index]["OBCPost"]!.text
+              : "obc1",
+          "ewsPost": postControllers[index]["EWSPost"]?.text.isNotEmpty == true
+              ? postControllers[index]["EWSPost"]!.text
+              : "ews1",
+          "scPost": postControllers[index]["SCPost"]?.text.isNotEmpty == true
+              ? postControllers[index]["SCPost"]!.text
+              : "sc1",
+          "stPost": postControllers[index]["STPost"]?.text.isNotEmpty == true
+              ? postControllers[index]["STPost"]!.text
+              : "st1",
           "eligiblityDetails":
-              postControllers[index]["EligibilityDetails"] ?? "",
+              postControllers[index]["EligibilityDetails"] ?? "default_id",
         });
 
-    print("These is the Podst data.........................................$postDetails");
-    print("These is the Podst Length........................................${postDetails.length}");
-
-
-        print(
-            "Saved eligibilityDetails for index $index: ${postControllers[index]["EligibilityDetails"]}");
+        print("Updated Post Details: $postDetails");
+        print("Total Posts in postDetails: ${postDetails.length}");
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -325,18 +346,17 @@ class _AddExamScreenState extends State<AddExamScreen> {
 
     final screenWidth = MediaQuery.of(context).size.width;
     bool isDesktop = screenWidth >= 1100;
-    final GlobalKey<FormState> _mobileFormKey = GlobalKey<FormState>();
-    final GlobalKey<FormState> _desktopFormKey = GlobalKey<FormState>();
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: bluegray,
-        title: Center(
-          child: Text(
-            "Add Exam",
-            style: TextStyle(color: white),
-          ),
-        ),
+       appBar: AppBar(
+        backgroundColor: blue,
+        title: Center(child: Row(
+          children: [
+            Image.asset("assets/images/app_logo.png", height: 30),
+            SizedBox(width: 10),
+            Text("Add Exam Screen", style: TextStyle(color: white)),
+          ],
+        )),
       ),
       drawer: isDesktop
           ? null
@@ -358,6 +378,20 @@ class _AddExamScreenState extends State<AddExamScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [ 
+                          IconButton(
+                              onPressed: () => context.go("/exams"),
+                              icon: Icon(Icons.arrow_back)),
+                          Text(
+                            "Add Exam",
+                            style: TextStyle(fontSize: 30),
+                          ),
+                        ],
+                      ),
+                    ),
                     isDesktop
                         ? buildDesktopView(
                             formKey:
@@ -898,6 +932,7 @@ class _AddExamScreenState extends State<AddExamScreen> {
               child: Container(
                 width: double.infinity,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _styledCard(
                       Column(
@@ -953,7 +988,6 @@ class _AddExamScreenState extends State<AddExamScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
                     ...List.generate(postControllers.length, (index) {
                       if (postControllers.isEmpty ||
                           postControllers[index] == null) {
@@ -1033,8 +1067,9 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                 fillColor: white,
                               ),
                               value: postControllers[index]
-                                      ["EligibilityDetails"] ??
-                                  "", // Ensure it's not null
+                                          ["EligibilityDetails"]
+                                      ?.toString() ??
+                                  "default_id", // Ensure it's not null
                               items: eligibilityViewModel.eligibilities
                                   .map((eligibility) {
                                 return DropdownMenuItem(
@@ -1059,14 +1094,17 @@ class _AddExamScreenState extends State<AddExamScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                ElevatedButton(
+                                CustomButton(
+                                  text: "Delete",
+                                  height: 30,
+                                  width: 100,
                                   onPressed: () {
                                     _deletePost(index);
                                   },
-                                  child: Text("Delete"),
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red),
-                                ),
+                                  backgroundColor: red,
+                                  textColor: Colors.white,
+                                  borderRadius: 8.0,
+                                )
                               ],
                             ),
                           ],
@@ -1074,21 +1112,35 @@ class _AddExamScreenState extends State<AddExamScreen> {
                       );
                     }),
                     SizedBox(height: 20),
-                    ElevatedButton(
+                    CustomButton(
+                      text: "+ Add Posts",
                       onPressed: _addPostField,
-                      child: Text("+ Add Posts"),
-                    ),
+                      backgroundColor: red,
+                      textColor: Colors.white,
+                      borderRadius: 8.0,
+                    )
                   ],
                 ),
               ),
             ),
           ),
-          ElevatedButton(
+          CustomButton(
+            text: "Add Exam",
             onPressed: () async {
               print("Buttpn Press....................00");
+
               if (formKey.currentState!.validate()) {
+                if (postControllers.isEmpty) {
+                  print("❌ Error: No posts found in postControllers.");
+                  return;
+                }
                 for (int i = 0; i < postControllers.length; i++) {
-                  _savePost(i);
+                  if (postControllers[i] == null) {
+                    print("❌ Error: postControllers[$i] is null, skipping.");
+                    continue;
+                  }
+                  print("Saving Post at Index $i: ${postControllers[i]}");
+                  _savePost(i, _desktopFormKey);
                 }
                 Map<String, dynamic> newExam = {
                   "name": nameController.text,
@@ -1163,7 +1215,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
                       correctiondateInForm?.toIso8601String(),
                   "jobPostingDate": jobPostingDate?.toIso8601String(),
                 };
-                print("These is the exam .................................................$newExam");
+                print(
+                    "These is the exam .................................................$newExam");
                 await examViewModel.addExam(newExam);
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -1173,8 +1226,9 @@ class _AddExamScreenState extends State<AddExamScreen> {
                 context.go('/exams');
               }
             },
-            child: Text("Add Exam"),
-          ),
+            textColor: Colors.white,
+            borderRadius: 8.0,
+          )
         ],
       ),
     );
@@ -1642,8 +1696,9 @@ class _AddExamScreenState extends State<AddExamScreen> {
                                 fillColor: white,
                               ),
                               value: postControllers[index]
-                                      ["EligibilityDetails"] ??
-                                  "", // Ensure it's not null
+                                          ["EligibilityDetails"]
+                                      ?.toString() ??
+                                  "default_id",
                               items: eligibilityViewModel.eligibilities
                                   .map((eligibility) {
                                 return DropdownMenuItem(
@@ -1665,33 +1720,51 @@ class _AddExamScreenState extends State<AddExamScreen> {
                             SizedBox(
                               height: 20,
                             ),
-                            ElevatedButton(
+                            CustomButton(
+                              text: "Delete",
+                              height: 30,
+                              width: 100,
                               onPressed: () {
                                 _deletePost(index);
                               },
-                              child: Text("Delete"),
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red),
-                            ),
+                              backgroundColor: red,
+                              textColor: Colors.white,
+                              borderRadius: 8.0,
+                            )
                           ],
                         ),
                       );
                     }),
                     SizedBox(height: 20),
-                    ElevatedButton(
+                    CustomButton(
+                      text: "+ Add Posts",
                       onPressed: _addPostField,
-                      child: Text("+ Add Posts"),
-                    ),
+                      backgroundColor: red,
+                      textColor: Colors.white,
+                      borderRadius: 8.0,
+                    )
                   ],
                 ),
               ),
             ),
           ),
-          ElevatedButton(
+          CustomButton(
+            text: "Add Exam",
             onPressed: () async {
+              print("Buttpn Press....................00");
+
               if (formKey.currentState!.validate()) {
+                if (postControllers.isEmpty) {
+                  print("❌ Error: No posts found in postControllers.");
+                  return;
+                }
                 for (int i = 0; i < postControllers.length; i++) {
-                  _savePost(i);
+                  if (postControllers[i] == null) {
+                    print("❌ Error: postControllers[$i] is null, skipping.");
+                    continue;
+                  }
+                  print("Saving Post at Index $i: ${postControllers[i]}");
+                  _savePost(i, _desktopFormKey);
                 }
                 Map<String, dynamic> newExam = {
                   "name": nameController.text,
@@ -1766,7 +1839,8 @@ class _AddExamScreenState extends State<AddExamScreen> {
                       correctiondateInForm?.toIso8601String(),
                   "jobPostingDate": jobPostingDate?.toIso8601String(),
                 };
-
+                print(
+                    "These is the exam .................................................$newExam");
                 await examViewModel.addExam(newExam);
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -1776,8 +1850,9 @@ class _AddExamScreenState extends State<AddExamScreen> {
                 context.go('/exams');
               }
             },
-            child: Text("Add Exam"),
-          ),
+            textColor: Colors.white,
+            borderRadius: 8.0,
+          )
         ],
       ),
     );

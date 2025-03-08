@@ -1,5 +1,8 @@
+import 'package:admin_panel/constants/button.dart';
 import 'package:admin_panel/constants/constant.dart';
+import 'package:admin_panel/constants/customdrawer.dart';
 import 'package:admin_panel/view_models/Eligibility_view_model.dart';
+import 'package:admin_panel/view_models/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +17,8 @@ class AddEligibility extends StatefulWidget {
 class _AddEligibilityState extends State<AddEligibility> {
   final _formKey = GlobalKey<FormState>();
   // Controllers for text fields
-  final TextEditingController eligiblityCriteriaController = TextEditingController();
+  final TextEditingController eligiblityCriteriaController =
+      TextEditingController();
 
   // Common Card Wrapper for styling
   Widget _styledCard(Widget child) {
@@ -33,18 +37,16 @@ class _AddEligibilityState extends State<AddEligibility> {
   // Styled TextField
   Widget _buildTextField(TextEditingController controller, String label,
       {bool isNumber = false}) {
-    return _styledCard(
-      TextFormField(
-        controller: controller,
-        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          filled: true,
-          fillColor: white,
-        ),
-        validator: (value) => value!.isEmpty ? "Enter $label" : null,
+    return TextFormField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        filled: true,
+        fillColor: white,
       ),
+      validator: (value) => value!.isEmpty ? "Enter $label" : null,
     );
   }
 
@@ -52,61 +54,110 @@ class _AddEligibilityState extends State<AddEligibility> {
   Widget build(BuildContext context) {
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isTablet = screenWidth >= 720 && screenWidth < 1024;
-    bool isDesktop = screenWidth >= 1024;
+    bool isDesktop = screenWidth >= 1100;
+    final authViewModel = Provider.of<AuthViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: bluegray,
-          title: Center(child: Text("Add eligibility", style: TextStyle(color: white)))),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Card(
-            margin: EdgeInsets.all(16),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            elevation: 4,
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Container(
-                width: isDesktop ? screenWidth * 0.4 : isTablet ? screenWidth * 0.7 : screenWidth * 0.95,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      _buildTextField(eligiblityCriteriaController, "eligiblityCriteria"),
+       appBar: AppBar(
+        backgroundColor: blue,
+        title: Center(child: Row(
+          children: [
+            Image.asset("assets/images/app_logo.png", height: 30),
+            SizedBox(width: 10),
+            Text("Add Eligiblity Screen", style: TextStyle(color: white)),
+          ],
+        )),
+      ),
+      body: Container(
+        color: bluegray50,
+        child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Drawer for desktop
+            isDesktop
+                ? CustomDrawer(
+                    onLogout: () => authViewModel.logout(),
+                  )
+                : SizedBox(),
 
-                      // Submit Button
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            Map<String, dynamic> neweligibility = {
-                              "eligiblityCriteria": eligiblityCriteriaController.text,
-                            };
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Card(
+                        color: white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      IconButton(
+                                          onPressed: () =>
+                                              context.go("/eligibilities"),
+                                          icon: Icon(Icons.arrow_back)),
+                                      Text(
+                                        "Add Eligibilities",
+                                        style: TextStyle(fontSize: 30),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Divider(),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                _buildTextField(eligiblityCriteriaController,
+                                    "eligiblityCriteria"),
+                                // Submit Button
+                                SizedBox(height: 20),
 
-                            // Call ViewModel to add eligibility
-                            await eligibilityViewModel.addEligibility(neweligibility);
+                                CustomButton(
+                                  width: 200,
+                                  text: "Add Eligibilities",
+                                  onPressed: () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      Map<String, dynamic> neweligibility = {
+                                        "eligiblityCriteria":
+                                            eligiblityCriteriaController.text,
+                                      };
 
-                            // Show success message
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content:
-                                      Text("eligibility added successfully!")),
-                            );
+                                      // Call ViewModel to add eligibility
+                                      await eligibilityViewModel
+                                          .addEligibility(neweligibility);
 
-                            // Close screen
-                            context.go('/eligibilities');
-                          }
-                        },
-                        child: Text("Add eligibility"),
+                                      // Show success message
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                "eligibility added successfully!")),
+                                      );
+
+                                      // Close screen
+                                      context.go('/eligibilities');
+                                    }
+                                  },
+                                  textColor: Colors.white,
+                                  borderRadius: 8.0,
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
+                    )
+                  ],
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -60,7 +60,7 @@ class _PostState extends State<PostScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: bluegray,
+        backgroundColor: blue,
         title: Center(child: Text("ALL POSTS", style: TextStyle(color: white))),
       ),
       drawer: isDesktop

@@ -32,8 +32,8 @@ class _HomescreenState extends State<Homescreen> {
 
     final double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 600;
-    bool isTablet = screenWidth < 1140;
-    bool isDesktop = screenWidth >= 1140;
+    bool isTablet = screenWidth < 1100;
+    bool isDesktop = screenWidth >= 1100;
 
     return Scaffold(
       appBar: AppBar(
@@ -62,9 +62,7 @@ class _HomescreenState extends State<Homescreen> {
               : SizedBox(),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(isMobile
-                  ? 8
-                  : 15.0),
+              padding: EdgeInsets.all(isMobile ? 8 : 15.0),
               child: GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: isMobile
@@ -111,41 +109,44 @@ class _HomescreenState extends State<Homescreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    child: Stack(
                       children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          
-                          children: [
-                            Text(
-                              cardData[index]['count'].toString(),
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Flexible(
-                              child: Text(
-                                cardData[index]['title'],
+                        Positioned(
+                          top: 15,
+                          right: 15,
+                          child: Icon(
+                            cardData[index]['icon'],
+                            size: 55,
+                            color: black12,
+                          ),
+                        ),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                cardData[index]['count'].toString(),
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
-                        ),
-                        Icon(
-                          cardData[index]['icon'],
-                          size: 50,
-                          color: black12,
+                              // SizedBox(height: 5),
+                              Flexible(
+                                child: Text(
+                                  cardData[index]['title'],
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

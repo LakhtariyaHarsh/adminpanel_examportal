@@ -19,9 +19,9 @@ class _PostState extends State<PostScreen> {
   @override
   void initState() {
     super.initState();
-    final postViewModel = Provider.of<PostViewModel>(context, listen: false);
-    // Fetch initial categories.
-    postViewModel.fetchPosts();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<PostViewModel>(context, listen: false).fetchPosts();
+    });
     _scrollController.addListener(_scrollListener);
   }
 
@@ -64,12 +64,18 @@ class _PostState extends State<PostScreen> {
         title: Center(child: Text("ALL POSTS", style: TextStyle(color: white))),
       ),
       drawer: isDesktop
-          ? null :CustomDrawer(onLogout: () => authViewModel.logout(),),
+          ? null
+          : CustomDrawer(
+              onLogout: () => authViewModel.logout(),
+            ),
       body: Row(
         children: [
           //Drawer for desktop
           isDesktop
-              ? CustomDrawer(onLogout: () => authViewModel.logout(),) : SizedBox(),
+              ? CustomDrawer(
+                  onLogout: () => authViewModel.logout(),
+                )
+              : SizedBox(),
           postViewModel.isLoading && postViewModel.posts.isEmpty
               ? Expanded(child: Center(child: CircularProgressIndicator()))
               : Expanded(
@@ -83,14 +89,16 @@ class _PostState extends State<PostScreen> {
                           TextField(
                             controller: _searchController,
                             onChanged: (value) {
-                              setState(() {
-                                _searchQuery = value;
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                setState(() {
+                                  _searchQuery = value;
+                                });
+                                if (value.isEmpty) {
+                                  postViewModel.clearSearch();
+                                } else {
+                                  postViewModel.searchPosts(value);
+                                }
                               });
-                              if (value.isEmpty) {
-                                postViewModel.clearSearch();
-                              } else {
-                                postViewModel.searchPosts(value);
-                              }
                             },
                             decoration: InputDecoration(
                               labelText: "Search posts",
@@ -127,8 +135,7 @@ class _PostState extends State<PostScreen> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           IconButton(
-                                            icon: Icon(Icons.edit,
-                                                color: blue),
+                                            icon: Icon(Icons.edit, color: blue),
                                             onPressed: () {
                                               GoRouter.of(context).push(
                                                 '/posts/update/${post["id"]}?postName=${Uri.encodeComponent(post["name"] ?? "")}&eligibilityid=${post["eligiblityDetails"] ?? ""}',
@@ -136,8 +143,8 @@ class _PostState extends State<PostScreen> {
                                             },
                                           ),
                                           IconButton(
-                                            icon: Icon(Icons.delete,
-                                                color: red),
+                                            icon:
+                                                Icon(Icons.delete, color: red),
                                             onPressed: () async {
                                               final id = post["id"] ?? "";
                                               await postViewModel

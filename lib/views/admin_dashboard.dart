@@ -19,9 +19,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   void initState() {
     super.initState();
-    final examViewModel = Provider.of<ExamViewModel>(context, listen: false);
-    // Initially load exams
-    examViewModel.fetchExams();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ExamViewModel>(context, listen: false).fetchExams();
+    });
     _scrollController.addListener(_scrollListener);
   }
 
@@ -58,9 +58,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
     bool isDesktop = screenWidth >= 1100;
 
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: blue,
-        title: Center(child: Row(
+        title: Center(
+            child: Row(
           children: [
             Image.asset("assets/images/app_logo.png", height: 30),
             SizedBox(width: 10),
@@ -95,7 +96,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           padding: const EdgeInsets.all(20.0),
                           child: Column(
                             children: [
-                              Text("All Exams",style: TextStyle(fontSize: 30),), Divider(),
+                              Text(
+                                "All Exams",
+                                style: TextStyle(fontSize: 30),
+                              ),
+                              Divider(),
                               SizedBox(height: 20),
                               // Search Bar
                               isDesktop || isTablet
@@ -110,12 +115,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                           child: TextField(
                                             controller: _searchController,
                                             onChanged: (value) {
-                                              if (value.isEmpty) {
-                                                examViewModel.clearSearch();
-                                              } else {
-                                                examViewModel
-                                                    .searchExams(value);
-                                              }
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                if (value.isEmpty) {
+                                                  examViewModel.clearSearch();
+                                                } else {
+                                                  examViewModel
+                                                      .searchExams(value);
+                                                }
+                                              });
                                             },
                                             decoration: InputDecoration(
                                               labelText: "Search Exams",
@@ -153,11 +161,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                         TextField(
                                           controller: _searchController,
                                           onChanged: (value) {
-                                            if (value.isEmpty) {
-                                              examViewModel.clearSearch();
-                                            } else {
-                                              examViewModel.searchExams(value);
-                                            }
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((_) {
+                                              if (value.isEmpty) {
+                                                examViewModel.clearSearch();
+                                              } else {
+                                                examViewModel
+                                                    .searchExams(value);
+                                              }
+                                            });
                                           },
                                           decoration: InputDecoration(
                                             labelText: "Search Exams",

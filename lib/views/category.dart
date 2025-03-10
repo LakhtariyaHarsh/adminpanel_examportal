@@ -20,10 +20,10 @@ class _CategoryState extends State<Category> {
   @override
   void initState() {
     super.initState();
-    final categoryViewModel =
-        Provider.of<CategoryViewModel>(context, listen: false);
-    // Fetch initial categories.
-    categoryViewModel.fetchCategories();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<CategoryViewModel>(context, listen: false).fetchCategories();
+    });
     _scrollController.addListener(_scrollListener);
   }
 
@@ -53,19 +53,20 @@ class _CategoryState extends State<Category> {
     final authViewModel = Provider.of<AuthViewModel>(context);
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
     // If a search query is active, use the search results; otherwise, show the full list.
-    final bool isSearching = _searchQuery.isNotEmpty;
-    final List displayedCategories = isSearching
-        ? categoryViewModel.searchResults
-        : categoryViewModel.categories;
+    // final bool isSearching = _searchQuery.isNotEmpty;
+    // final List displayedCategories = isSearching
+    //     ? categoryViewModel.searchResults
+    //     : categoryViewModel.categories;
 
     final double screenWidth = MediaQuery.of(context).size.width;
     bool isTablet = screenWidth > 600;
     bool isDesktop = screenWidth >= 1100;
 
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: blue,
-        title: Center(child: Row(
+        title: Center(
+            child: Row(
           children: [
             Image.asset("assets/images/app_logo.png", height: 30),
             SizedBox(width: 10),
@@ -99,8 +100,12 @@ class _CategoryState extends State<Category> {
                           padding: const EdgeInsets.all(20.0),
                           child: Column(
                             children: [
-                              Text("All Categories",style: TextStyle(fontSize: 30),), Divider(),
-                                  SizedBox(height: 20),
+                              Text(
+                                "All Categories",
+                                style: TextStyle(fontSize: 30),
+                              ),
+                              Divider(),
+                              SizedBox(height: 20),
                               // Search Bar
                               isDesktop || isTablet
                                   ? Row(
@@ -112,22 +117,27 @@ class _CategoryState extends State<Category> {
                                           child: TextField(
                                             controller: _searchController,
                                             onChanged: (value) {
-                                              setState(() {
-                                                _searchQuery = value;
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                setState(() {
+                                                  _searchQuery = value;
+                                                });
+                                                if (value.isEmpty) {
+                                                  categoryViewModel
+                                                      .clearSearch();
+                                                } else {
+                                                  categoryViewModel
+                                                      .searchCategories(value);
+                                                }
                                               });
-                                              if (value.isEmpty) {
-                                                categoryViewModel.clearSearch();
-                                              } else {
-                                                categoryViewModel
-                                                    .searchCategories(value);
-                                              }
                                             },
                                             decoration: InputDecoration(
                                               labelText: "Search Categories",
                                               prefixIcon: Icon(Icons.search),
                                               border: OutlineInputBorder(
                                                   borderRadius:
-                                                      BorderRadius.circular(10)),
+                                                      BorderRadius.circular(
+                                                          10)),
                                               filled: true,
                                               fillColor: white,
                                             ),
@@ -148,20 +158,24 @@ class _CategoryState extends State<Category> {
                                       ],
                                     )
                                   : Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         TextField(
                                           controller: _searchController,
                                           onChanged: (value) {
-                                            setState(() {
-                                              _searchQuery = value;
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((_) {
+                                              setState(() {
+                                                _searchQuery = value;
+                                              });
+                                              if (value.isEmpty) {
+                                                categoryViewModel.clearSearch();
+                                              } else {
+                                                categoryViewModel
+                                                    .searchCategories(value);
+                                              }
                                             });
-                                            if (value.isEmpty) {
-                                              categoryViewModel.clearSearch();
-                                            } else {
-                                              categoryViewModel
-                                                  .searchCategories(value);
-                                            }
                                           },
                                           decoration: InputDecoration(
                                             labelText: "Search Categories",
@@ -191,69 +205,83 @@ class _CategoryState extends State<Category> {
                               SizedBox(height: 20),
                               // Category List
                               Expanded(
-                                child: ListView.builder(
-                                  controller: _scrollController,
-                                  itemCount: displayedCategories.length,
-                                  itemBuilder: (context, index) {
-                                    final category = displayedCategories[index];
-                                    return Card(
-                                      color: bluegray50,
-                                      margin: EdgeInsets.symmetric(vertical: 10),
-                                      elevation: 4,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10)),
-                                      child: ListTile(
-                                        title: Text(
-                                          category["name"] ??
-                                              category["categoryName"] ??
-                                              "",
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        trailing: SizedBox(
-                                          width: 100,
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(Icons.edit,
-                                                    color: Colors.blue),
-                                                onPressed: () {
-                                                  context.push(
-                                                      '/categories/update/${category["id"]}');
-                                                },
+                                child: Consumer<CategoryViewModel>(
+                                  builder: (context, categoryViewModel, child) {
+                                    final bool isSearching =
+                                        _searchQuery.isNotEmpty;
+                                    final List displayedCategories = isSearching
+                                        ? categoryViewModel.searchResults
+                                        : categoryViewModel.categories;
+
+                                    if (categoryViewModel.isLoading &&
+                                        displayedCategories.isEmpty) {
+                                      return Center(
+                                          child: CircularProgressIndicator());
+                                    }
+
+                                    return ListView.builder(
+                                      controller: _scrollController,
+                                      itemCount: displayedCategories.length,
+                                      itemBuilder: (context, index) {
+                                        final category =
+                                            displayedCategories[index];
+                                        return Card(
+                                          color: bluegray50,
+                                          margin: EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          elevation: 4,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: ListTile(
+                                            title: Text(
+                                              category["name"] ??
+                                                  category["categoryName"] ??
+                                                  "",
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                            trailing: SizedBox(
+                                              width: 100,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  IconButton(
+                                                    icon: Icon(Icons.edit,
+                                                        color: Colors.blue),
+                                                    onPressed: () {
+                                                      context.push(
+                                                          '/categories/update/${category["id"]}');
+                                                    },
+                                                  ),
+                                                  IconButton(
+                                                    icon: Icon(Icons.delete,
+                                                        color: red),
+                                                    onPressed: () async {
+                                                      final id =
+                                                          category["id"] ?? "";
+                                                      await categoryViewModel
+                                                          .deleteCategory(id);
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                        SnackBar(
+                                                            content: Text(
+                                                                "Category deleted successfully")),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
                                               ),
-                                              IconButton(
-                                                icon:
-                                                    Icon(Icons.delete, color: red),
-                                                onPressed: () async {
-                                                  final id = category["id"] ?? "";
-                                                  await categoryViewModel
-                                                      .deleteCategory(id);
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                        content: Text(
-                                                            "Category deleted successfully")),
-                                                  );
-                                                },
-                                              ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      ),
+                                        );
+                                      },
                                     );
                                   },
                                 ),
                               ),
-                              // Optional: A loader at the bottom when loading more data.
-                              if (categoryViewModel.isLoading &&
-                                  categoryViewModel.categories.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(),
-                                ),
                             ],
                           ),
                         ),

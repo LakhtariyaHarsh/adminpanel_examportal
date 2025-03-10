@@ -74,7 +74,7 @@ class EligibilityViewModel extends ChangeNotifier {
   }
 
   /// Search categories by name.
-  Future<void> searchCategories(String query) async {
+  Future<void> searchEligibilities(String query) async {
     if (query.isEmpty) {
       _searchResults = [];
       notifyListeners();

@@ -20,10 +20,10 @@ class _EligibilityState extends State<EligibilityScreen> {
   @override
   void initState() {
     super.initState();
-    final eligibilityViewModel =
-        Provider.of<EligibilityViewModel>(context, listen: false);
-    // Fetch initial categories.
-    eligibilityViewModel.fetchEligibilities();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<EligibilityViewModel>(context, listen: false)
+          .fetchEligibilities();
+    });
     _scrollController.addListener(_scrollListener);
   }
 
@@ -34,13 +34,13 @@ class _EligibilityState extends State<EligibilityScreen> {
     super.dispose();
   }
 
-  // Scroll listener that triggers load-more when near bottom.
+  // Scroll listener to load more eligibilities when near bottom.
   void _scrollListener() {
+    final eligibilityViewModel =
+        Provider.of<EligibilityViewModel>(context, listen: false);
+
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      final eligibilityViewModel =
-          Provider.of<EligibilityViewModel>(context, listen: false);
-      // If not loading and more pages exist, fetch more.
       if (!eligibilityViewModel.isLoading &&
           eligibilityViewModel.page < eligibilityViewModel.totalPages) {
         eligibilityViewModel.fetchEligibilities(isLoadMore: true);
@@ -50,14 +50,9 @@ class _EligibilityState extends State<EligibilityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = Provider.of<AuthViewModel>(context);
-
-    final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
-    // If a search query is active, use the search results; otherwise, show the full list.
-    final bool isSearching = _searchQuery.isNotEmpty;
-    final List displaydEligibilities = isSearching
-        ? eligibilityViewModel.searchResults
-        : eligibilityViewModel.eligibilities;
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    final eligibilityViewModel =
+        Provider.of<EligibilityViewModel>(context, listen: false);
 
     final double screenWidth = MediaQuery.of(context).size.width;
     bool isTablet = screenWidth > 600;
@@ -66,13 +61,15 @@ class _EligibilityState extends State<EligibilityScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: blue,
-        title: Center(child: Row(
-          children: [
-            Image.asset("assets/images/app_logo.png", height: 30),
-            SizedBox(width: 10),
-            Text("Eligiblity Screen", style: TextStyle(color: white)),
-          ],
-        )),
+        title: Center(
+          child: Row(
+            children: [
+              Image.asset("assets/images/app_logo.png", height: 30),
+              SizedBox(width: 10),
+              Text("Eligibility Screen", style: TextStyle(color: white)),
+            ],
+          ),
+        ),
       ),
       drawer: isDesktop
           ? null
@@ -81,190 +78,206 @@ class _EligibilityState extends State<EligibilityScreen> {
             ),
       body: Row(
         children: [
-          //Drawer for desktop
           isDesktop
               ? CustomDrawer(
                   onLogout: () => authViewModel.logout(),
                 )
               : SizedBox(),
-          eligibilityViewModel.isLoading &&
-                  eligibilityViewModel.eligibilities.isEmpty
-              ? Expanded(child: Center(child: CircularProgressIndicator()))
-              : Expanded(
-                  child: Container(
-                    color: bluegray50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Card(
-                        color: white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            children: [
-                              Text("All Eligibilities",style: TextStyle(fontSize: 30),), Divider(),
-                                  SizedBox(height: 20),
-                              // Search Bar
-                        
-                              isDesktop || isTablet
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        SizedBox(
-                                          width: 300,
-                                          child: TextField(
-                                            controller: _searchController,
-                                            onChanged: (value) {
-                                              setState(() {
-                                                _searchQuery = value;
-                                              });
-                                              if (value.isEmpty) {
-                                                eligibilityViewModel.clearSearch();
-                                              } else {
-                                                eligibilityViewModel
-                                                    .searchCategories(value);
-                                              }
-                                            },
-                                            decoration: InputDecoration(
-                                              labelText: "Search eligibilities",
-                                              prefixIcon: Icon(Icons.search),
-                                              border: OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10)),
-                                              filled: true,
-                                              fillColor: white,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                            width:
-                                                200, // Set fixed width for the button
-                                            height:
-                                                50, // Optional: Set fixed height
-                                            child: CustomButton(
-                                              text: "Add Eligiblities",
-                                              route: "/eligibilities/add",
-                                              backgroundColor: Colors.blue,
-                                              textColor: Colors.white,
-                                              borderRadius: 8.0,
-                                            )),
-                                      ],
-                                    )
-                                  : Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        TextField(
-                                          controller: _searchController,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              _searchQuery = value;
-                                            });
-                                            if (value.isEmpty) {
-                                              eligibilityViewModel.clearSearch();
-                                            } else {
-                                              eligibilityViewModel
-                                                  .searchCategories(value);
-                                            }
-                                          },
-                                          decoration: InputDecoration(
-                                            labelText: "Search eligibilities",
-                                            prefixIcon: Icon(Icons.search),
-                                            border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10)),
-                                            filled: true,
-                                            fillColor: white,
-                                          ),
-                                        ),
-                                        SizedBox(height: 20),
-                                        SizedBox(
-                                            width:
-                                                200, // Set fixed width for the button
-                                            height:
-                                                50, // Optional: Set fixed height
-                                            child: CustomButton(
-                                              text: "Add Eligiblities",
-                                              route: "/eligibilities/add",
-                                              backgroundColor: Colors.blue,
-                                              textColor: Colors.white,
-                                              borderRadius: 8.0,
-                                            )),
-                                      ],
+          Expanded(
+            child: Container(
+              color: bluegray50,
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Card(
+                  color: white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          "All Eligibilities",
+                          style: TextStyle(fontSize: 30),
+                        ),
+                        Divider(),
+                        SizedBox(height: 20),
+                        // Search Bar
+                        isDesktop || isTablet
+                            ? Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                    width: 300,
+                                    child: TextField(
+                                      controller: _searchController,
+                                      onChanged: (value) {
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          setState(() {
+                                            _searchQuery = value;
+                                          });
+
+                                          if (value.isEmpty) {
+                                            eligibilityViewModel.clearSearch();
+                                          } else {
+                                            eligibilityViewModel
+                                                .searchEligibilities(value);
+                                          }
+                                        });
+                                      },
+                                      decoration: InputDecoration(
+                                        labelText: "Search eligibilities",
+                                        prefixIcon: Icon(Icons.search),
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
+                                        filled: true,
+                                        fillColor: white,
+                                      ),
                                     ),
-                              SizedBox(height: 20),
-                              // eligibility List
-                              Expanded(
-                                child: ListView.builder(
-                                  controller: _scrollController,
-                                  itemCount: displaydEligibilities.length,
-                                  itemBuilder: (context, index) {
-                                    final eligibility =
-                                        displaydEligibilities[index];
-                                    return Card(
-                                      color: bluegray50,
-                                      margin: EdgeInsets.symmetric(vertical: 10),
-                                      elevation: 4,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10)),
-                                      child: ListTile(
-                                        title: Text(
-                                          eligibility["name"] ??
-                                              eligibility["eligiblityCriteria"] ??
-                                              "",
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        trailing: SizedBox(
-                                          width: 100,
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(Icons.edit, color: blue),
-                                                onPressed: () {
-                                                  context.push(
-                                                      '/eligibilities/update/${eligibility["id"]}');
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon:
-                                                    Icon(Icons.delete, color: red),
-                                                onPressed: () async {
-                                                  final id =
-                                                      eligibility["id"] ?? "";
-                                                  await eligibilityViewModel
-                                                      .deleteEligibility(id);
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                        content: Text(
-                                                            "eligibility deleted successfully")),
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
+                                  ),
+                                  SizedBox(
+                                    width: 200,
+                                    height: 50,
+                                    child: CustomButton(
+                                      text: "Add Eligibilities",
+                                      route: "/eligibilities/add",
+                                      backgroundColor: Colors.blue,
+                                      textColor: Colors.white,
+                                      borderRadius: 8.0,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  TextField(
+                                    controller: _searchController,
+                                    onChanged: (value) {
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          setState(() {
+                                            _searchQuery = value;
+                                          });
+
+                                          if (value.isEmpty) {
+                                            eligibilityViewModel.clearSearch();
+                                          } else {
+                                            eligibilityViewModel
+                                                .searchEligibilities(value);
+                                          }
+                                        });
+                                      },
+                                    decoration: InputDecoration(
+                                      labelText: "Search eligibilities",
+                                      prefixIcon: Icon(Icons.search),
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      filled: true,
+                                      fillColor: white,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                  SizedBox(
+                                      width:
+                                          200, // Set fixed width for the button
+                                      height: 50, // Optional: Set fixed height
+                                      child: CustomButton(
+                                        text: "Add Eligiblities",
+                                        route: "/eligibilities/add",
+                                        backgroundColor: Colors.blue,
+                                        textColor: Colors.white,
+                                        borderRadius: 8.0,
+                                      )),
+                                ],
+                              ),
+                        SizedBox(height: 20),
+                        // Eligibility List
+                        Expanded(
+                          child: Consumer<EligibilityViewModel>(
+                            builder: (context, eligibilityViewModel, child) {
+                              final bool isSearching = _searchQuery.isNotEmpty;
+                              final List displayedEligibilities = isSearching
+                                  ? eligibilityViewModel.searchResults
+                                  : eligibilityViewModel.eligibilities;
+
+                              if (eligibilityViewModel.isLoading &&
+                                  displayedEligibilities.isEmpty) {
+                                return Center(
+                                    child: CircularProgressIndicator());
+                              }
+
+                              return ListView.builder(
+                                controller: _scrollController,
+                                itemCount: displayedEligibilities.length,
+                                itemBuilder: (context, index) {
+                                  final eligibility =
+                                      displayedEligibilities[index];
+                                  return Card(
+                                    color: bluegray50,
+                                    margin: EdgeInsets.symmetric(vertical: 10),
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: ListTile(
+                                      title: Text(
+                                        eligibility["name"] ??
+                                            eligibility[
+                                                "eligibilityCriteria"] ??
+                                            "",
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      trailing: SizedBox(
+                                        width: 100,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: Icon(Icons.edit,
+                                                  color: Colors.blue),
+                                              onPressed: () {
+                                                context.push(
+                                                    '/eligibilities/update/${eligibility["id"]}');
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: Icon(Icons.delete,
+                                                  color: red),
+                                              onPressed: () async {
+                                                final id =
+                                                    eligibility["id"] ?? "";
+                                                await eligibilityViewModel
+                                                    .deleteEligibility(id);
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                      content: Text(
+                                                          "Eligibility deleted successfully")),
+                                                );
+                                              },
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              // Optional: A loader at the bottom when loading more data.
-                              if (eligibilityViewModel.isLoading &&
-                                  eligibilityViewModel.eligibilities.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(),
-                                ),
-                            ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -7,6 +7,7 @@ import 'package:admin_panel/view_models/exam_view_model.dart';
 import 'package:admin_panel/view_models/post_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Homescreen extends StatefulWidget {
   const Homescreen({super.key});
@@ -37,24 +38,33 @@ class _HomescreenState extends State<Homescreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: blue,
-        title: Center(child: Row(
-          children: [
-            Image.asset("assets/images/app_logo.png", height: 30),
-            SizedBox(width: 10),
-            Text("Dashboard Screen", style: TextStyle(color: white)),
-          ],
-        )),
+        title: Center(
+          child: Row(
+            children: [
+              Image.asset("assets/images/app_logo.png", height: 30),
+              SizedBox(width: 10),
+              Text("Dashboard Screen", style: TextStyle(color: white)),
+            ],
+          ),
+        ),
       ),
       drawer: isDesktop
-          ? null :CustomDrawer(onLogout: () => authViewModel.logout(),),
+          ? null
+          : CustomDrawer(
+              onLogout: () => authViewModel.logout(),
+            ),
       body: Row(
         children: [
-          //Drawer for desktop
           isDesktop
-              ? CustomDrawer(onLogout: () => authViewModel.logout(),)  : SizedBox(),
+              ? CustomDrawer(
+                  onLogout: () => authViewModel.logout(),
+                )
+              : SizedBox(),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(isMobile ? 8 : isTablet? 15: 50.0),
+              padding: EdgeInsets.all(isMobile
+                  ? 8
+                  : 15.0),
               child: GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: isMobile
@@ -62,61 +72,82 @@ class _HomescreenState extends State<Homescreen> {
                       : isTablet
                           ? 3
                           : 4,
-                  childAspectRatio: 1.0,
-                  crossAxisSpacing: 10,
+                  childAspectRatio: 2.0,
+                  crossAxisSpacing: 5,
                   mainAxisSpacing: 10,
                 ),
                 itemCount: 4,
                 itemBuilder: (BuildContext context, int index) {
                   List<Map<String, dynamic>> cardData = [
-                    {'title': "Total Exams", 'count': Exams.length},
-                    {'title': "Total Categories", 'count': Categories.length},
-                    {'title': "Total Posts", 'count': Posts.length},
+                    {
+                      'title': "Total Exams",
+                      'count': Exams.length,
+                      'color': Colors.teal,
+                      'icon': FontAwesomeIcons.bookOpenReader
+                    },
                     {
                       'title': "Total Eligibilities",
-                      'count': Eligibilities.length
+                      'count': Eligibilities.length,
+                      'color': Colors.green,
+                      'icon': FontAwesomeIcons.chartLine
+                    },
+                    {
+                      'title': "Total Categories",
+                      'count': Categories.length,
+                      'color': Colors.amber,
+                      'icon': FontAwesomeIcons.list
+                    },
+                    {
+                      'title': "Total Posts",
+                      'count': Posts.length,
+                      'color': Colors.red,
+                      'icon': FontAwesomeIcons.newspaper
                     },
                   ];
 
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      color: bluegray50,
-                      elevation: 10,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: Center(
-                        child: Column(
+                  return Card(
+                    color: cardData[index]['color'],
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
+                          
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: Text(
-                                  cardData[index]['title'],
-                                  style: TextStyle(
-                                    fontSize: isMobile? 16 :isTablet? 22: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: black87,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 10),
                             Text(
                               cardData[index]['count'].toString(),
                               style: TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.w600,
-                                color: bluegray90,
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Flexible(
+                              child: Text(
+                                cardData[index]['title'],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                      ),
+                        Icon(
+                          cardData[index]['icon'],
+                          size: 50,
+                          color: black12,
+                        ),
+                      ],
                     ),
                   );
                 },

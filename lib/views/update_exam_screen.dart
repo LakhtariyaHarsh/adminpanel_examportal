@@ -584,8 +584,8 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
 
     final screenWidth = MediaQuery.of(context).size.width;
     bool isDesktop = screenWidth >= 1100;
-    final GlobalKey<FormState> _mobileFormKey = GlobalKey<FormState>();
-    final GlobalKey<FormState> _desktopFormKey = GlobalKey<FormState>();
+    // final GlobalKey<FormState> _mobileFormKey = GlobalKey<FormState>();
+    // final GlobalKey<FormState> _desktopFormKey = GlobalKey<FormState>();
 
     return Scaffold(
       appBar: AppBar(
@@ -635,7 +635,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                       ),
                     ),
                     isDesktop
-                        ? buildDesktopView()
+                        ? buildDesktopView(formKey: _desktopFormKey)
                         : buildMobileView(formKey: _mobileFormKey),
                   ],
                 ),
@@ -647,14 +647,16 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
     );
   }
 
-  Widget buildDesktopView() {
+  Widget buildDesktopView({
+    required GlobalKey<FormState> formKey, // Use a separate form key
+  }) {
     final examViewModel = Provider.of<ExamViewModel>(context);
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
     return isLoading
         ? Center(child: CircularProgressIndicator())
         : Form(
-            key: _desktopFormKey, // ✅ Use correct unique key
+            key: formKey, // ✅ Use correct unique key
             child: Column(
               children: [
                 Card(
@@ -1502,7 +1504,6 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
   Widget buildMobileView({
     required GlobalKey<FormState> formKey, // Use a separate form key
   }) {
-    final authViewModel = Provider.of<AuthViewModel>(context);
     final examViewModel = Provider.of<ExamViewModel>(context);
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
     final eligibilityViewModel = Provider.of<EligibilityViewModel>(context);
@@ -2151,8 +2152,7 @@ class _UpdateExamScreenState extends State<UpdateExamScreen> {
                         "jobPostingDate": jobPostingDate?.toIso8601String(),
                       };
 
-                       await examViewModel.updateExam(
-                                      widget.id, updatedExam);
+                      await examViewModel.updateExam(widget.id, updatedExam);
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Exam updated successfully!")),

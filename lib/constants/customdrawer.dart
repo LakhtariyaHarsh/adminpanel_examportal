@@ -54,15 +54,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   itemCount: menuItems.keys.length,
                   itemBuilder: (context, index) {
                     String sectionTitle = menuItems.keys.elementAt(index);
-                    List<Map<String, String>> sectionItems = menuItems[sectionTitle]!;
-                    return _buildExpandableMenu(context, sectionTitle, sectionItems);
+                    List<Map<String, String>> sectionItems =
+                        menuItems[sectionTitle]!;
+                    return _buildExpandableMenu(
+                        context, sectionTitle, sectionItems);
                   },
                   separatorBuilder: (context, index) => _buildDivider(),
                 ),
               ),
             ),
             _buildDivider(),
-            _buildDrawerItem(context, Icons.logout, "Logout", "/login", isLogout: true),
+            _buildDrawerItem(context, Icons.logout, "Logout", "/login",
+                isLogout: true),
           ],
         ),
       ),
@@ -82,7 +85,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
           SizedBox(height: 10),
           Text(
             "Hi, Admin 👋",
-            style: TextStyle(color: white70, fontSize: 16,  ),
+            style: TextStyle(
+              color: white70,
+              fontSize: 16,
+            ),
           ),
         ],
       ),
@@ -93,8 +99,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
     return const Divider(color: white24, thickness: 1);
   }
 
-  Widget _buildExpandableMenu(BuildContext context, String title, List<Map<String, String>> items) {
+  Widget _buildExpandableMenu(
+      BuildContext context, String title, List<Map<String, String>> items) {
     bool isHovered = hoveredMenu == title;
+
+    // Check if any of the child items' routes match the current route
+    bool isSelected = items.any((item) =>
+        GoRouter.of(context).routerDelegate.currentConfiguration.fullPath ==
+        item["route"]);
 
     return MouseRegion(
       onEnter: (_) => setState(() => hoveredMenu = title),
@@ -103,7 +115,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
         data: ThemeData().copyWith(dividerColor: Colors.transparent),
         child: Container(
           decoration: BoxDecoration(
-            color: isHovered ? Color(0xff494e53) : Colors.transparent,
+            color: isSelected
+                ? Color(0xff494e53) // Selected menu item background color
+                : isHovered
+                    ? Color(0xff494e53) // Hover effect
+                    : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: ExpansionTile(
@@ -112,10 +128,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
             leading: _getIcon(title),
             title: Text(
               title,
-              style: const TextStyle(color: white70,  ),
+              style: const TextStyle(color: white70),
             ),
             children: items.map((item) {
-              return _buildDrawerItem(context, Icons.circle_outlined, item["title"]!, item["route"]!);
+              return _buildDrawerItem(context, Icons.circle_outlined,
+                  item["title"]!, item["route"]!);
             }).toList(),
           ),
         ),
@@ -123,9 +140,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
     );
   }
 
-  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, String route, {bool isLogout = false}) {
+  Widget _buildDrawerItem(
+      BuildContext context, IconData icon, String title, String route,
+      {bool isLogout = false}) {
     bool isHovered = hoveredItem == title;
-    bool isSelected = GoRouter.of(context).routerDelegate.currentConfiguration.fullPath == route;
+    bool isSelected =
+        GoRouter.of(context).routerDelegate.currentConfiguration.fullPath ==
+            route;
 
     return MouseRegion(
       onEnter: (_) => setState(() => hoveredItem = title),
@@ -139,7 +160,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             context.go(route);
           },
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 50),
             curve: Curves.easeInOut,
             decoration: BoxDecoration(
               color: isHovered
@@ -152,12 +173,12 @@ class _CustomDrawerState extends State<CustomDrawer> {
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
             child: Row(
               children: [
-                Icon(icon, color: isSelected ?  white: white70, size: 20),
+                Icon(icon, color: isSelected ? white : white70, size: 20),
                 const SizedBox(width: 10),
                 Text(
                   title,
                   style: TextStyle(
-                    color: isSelected ?  white: white70,
+                    color: isSelected ? white : white70,
                   ),
                 ),
               ],
@@ -171,15 +192,15 @@ class _CustomDrawerState extends State<CustomDrawer> {
   Icon _getIcon(String title) {
     switch (title) {
       case "Exams":
-        return Icon(Icons.school, color:  white70);
+        return Icon(Icons.school, color: white70);
       case "Category":
-        return Icon(Icons.category, color:  white70);
+        return Icon(Icons.category, color: white70);
       case "Eligibility":
-        return Icon(Icons.verified_user, color:  white70);
+        return Icon(Icons.verified_user, color: white70);
       case "Post":
-        return Icon(Icons.article, color:  white70);
+        return Icon(Icons.article, color: white70);
       default:
-        return Icon(Icons.dashboard, color:  white70);
+        return Icon(Icons.dashboard, color: white70);
     }
   }
 }

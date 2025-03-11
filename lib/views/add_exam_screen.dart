@@ -1130,18 +1130,12 @@ class _AddExamScreenState extends State<AddExamScreen> {
               print("Buttpn Press....................00");
 
               if (formKey.currentState!.validate()) {
-                if (postControllers.isEmpty) {
-                  print("❌ Error: No posts found in postControllers.");
-                  return;
-                }
-                for (int i = 0; i < postControllers.length; i++) {
-                  if (postControllers[i] == null) {
-                    print("❌ Error: postControllers[$i] is null, skipping.");
-                    continue;
-                  }
-                  print("Saving Post at Index $i: ${postControllers[i]}");
-                  _savePost(i, _desktopFormKey);
-                }
+                // Save each post before proceeding
+                                for (int i = 0;
+                                    i < postControllers.length;
+                                    i++) {
+                                  _savePost(i,_desktopFormKey);
+                                }
                 Map<String, dynamic> newExam = {
                   "name": nameController.text,
                   "examCategory": selectedCategory,
@@ -1754,18 +1748,12 @@ class _AddExamScreenState extends State<AddExamScreen> {
               print("Buttpn Press....................00");
 
               if (formKey.currentState!.validate()) {
-                if (postControllers.isEmpty) {
-                  print("❌ Error: No posts found in postControllers.");
-                  return;
-                }
-                for (int i = 0; i < postControllers.length; i++) {
-                  if (postControllers[i] == null) {
-                    print("❌ Error: postControllers[$i] is null, skipping.");
-                    continue;
-                  }
-                  print("Saving Post at Index $i: ${postControllers[i]}");
-                  _savePost(i, _desktopFormKey);
-                }
+                // Save each post before proceeding
+                                for (int i = 0;
+                                    i < postControllers.length;
+                                    i++) {
+                                  _savePost(i,_mobileFormKey);
+                                }
                 Map<String, dynamic> newExam = {
                   "name": nameController.text,
                   "examCategory": selectedCategory,
